@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "ESNext"
+    ],
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "Bundler",
+    "moduleDetection": "force",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "composite": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "downlevelIteration": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "types": [
+      "bun-types", // add Bun global
+      "mocha"
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "executors/**/*",
+    "deployment.json",
+    "stackr.config.ts",
+    "genesis-state.json"
+  ]
+}

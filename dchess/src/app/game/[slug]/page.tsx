@@ -1,6 +1,7 @@
 "use client";
 import { getGame } from "@/api/api";
 import { useAction } from "@/api/useAction";
+import { formatAddress } from "@/lib/utils";
 import { usePrivy } from "@privy-io/react-auth";
 import { Chess, Move } from "chess.js";
 import { useEffect, useState } from "react";
@@ -17,6 +18,7 @@ export default function Game(props: GameProps) {
   const { params } = props;
   const { slug } = params;
   const { user } = usePrivy();
+  const walletAddress = user?.wallet?.address;
   const { data, isLoading, error } = useSWR(
     `games/${slug}`,
     () => getGame(slug),
@@ -41,7 +43,6 @@ export default function Game(props: GameProps) {
   }
 
   function onDrop(sourceSquare: string, targetSquare: string) {
-    const walletAddress = user?.wallet?.address;
     if (walletAddress !== data?.w && walletAddress !== data?.b) {
       return false;
     }
@@ -75,10 +76,16 @@ export default function Game(props: GameProps) {
           <b>Game ID:</b> <span className="font-mono">{slug}</span>
         </p>
         <p>
-          <b>White:</b> <span className="font-mono">{data.w}</span>
+          <b>P1 (w):</b>{" "}
+          <span className="font-mono">
+            {walletAddress === data.w ? "You" : formatAddress(data.w)}
+          </span>
         </p>
         <p>
-          <b>Black:</b> <span className="font-mono">{data.b}</span>
+          <b>P2 (b):</b>{" "}
+          <span className="font-mono">
+            {walletAddress === data.b ? "You" : formatAddress(data.b)}
+          </span>
         </p>
         <p>
           <b>Turn:</b> {game.split(" ")[1] === "w" ? "White" : "Black"}

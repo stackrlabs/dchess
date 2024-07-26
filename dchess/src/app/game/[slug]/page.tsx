@@ -1,8 +1,8 @@
 "use client";
 import { getGame } from "@/api/api";
 import { useAction } from "@/api/useAction";
-import { formatAddress } from "@/lib/utils";
-import { usePrivy } from "@privy-io/react-auth";
+import { useAddress } from "@/hooks/useAddress";
+import { ZeroAddress } from "@/lib/constants";
 import { Chess, Move } from "chess.js";
 import { useEffect, useState } from "react";
 import { Chessboard } from "react-chessboard";
@@ -17,8 +17,7 @@ interface GameProps {
 export default function Game(props: GameProps) {
   const { params } = props;
   const { slug } = params;
-  const { user } = usePrivy();
-  const walletAddress = user?.wallet?.address;
+  const { walletAddress, renderString } = useAddress();
   const { data, isLoading, error } = useSWR(
     `games/${slug}`,
     () => getGame(slug),
@@ -61,13 +60,15 @@ export default function Game(props: GameProps) {
     return true;
   }
 
-  if (isLoading || !data) {
+  if (isLoading || !data || !walletAddress) {
     return <div>Loading...</div>;
   }
 
   if (error) {
     return <div>Error: {error.message}</div>;
   }
+
+  const { w, b, startedAt } = data;
 
   return (
     <div className="flex justify-center mt-6 self-center flex-col gap-4">
@@ -76,22 +77,27 @@ export default function Game(props: GameProps) {
           <b>Game ID:</b> <span className="font-mono">{slug}</span>
         </p>
         <p>
-          <b>P1 (w):</b>{" "}
-          <span className="font-mono">
-            {walletAddress === data.w ? "You" : formatAddress(data.w)}
-          </span>
+          <b>P1 (w):</b> <span className="font-mono">{renderString(w)}</span>
         </p>
         <p>
-          <b>P2 (b):</b>{" "}
-          <span className="font-mono">
-            {walletAddress === data.b ? "You" : formatAddress(data.b)}
-          </span>
+          <b>P2 (b):</b> <span className="font-mono">{renderString(b)}</span>
         </p>
         <p>
           <b>Turn:</b> {game.split(" ")[1] === "w" ? "White" : "Black"}
         </p>
       </div>
-      <Chessboard boardWidth={600} position={game} onPieceDrop={onDrop} />
+      <Chessboard
+        boardWidth={600}
+        position={game}
+        onPieceDrop={onDrop}
+        boardOrientation={b === walletAddress ? "black" : "white"}
+        arePiecesDraggable={
+          startedAt > 0 &&
+          (w === walletAddress || walletAddress === b) &&
+          w !== ZeroAddress &&
+          b !== ZeroAddress
+        }
+      />
     </div>
   );
 }

@@ -11,8 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useAddress } from "@/hooks/useAddress";
 import { formatAddress } from "@/lib/utils";
-import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 
@@ -20,8 +20,7 @@ export default function Home() {
   const { submit } = useAction();
   const router = useRouter();
   const { data } = useSWR("games", () => getGames());
-  const { user } = usePrivy();
-  const walletAddress = user?.wallet?.address;
+  const { renderString, walletAddress } = useAddress();
 
   const handleCreateGame = async () => {
     const { logs } = await submit("createGame", {
@@ -74,10 +73,10 @@ export default function Home() {
                   {formatAddress(game.gameId)}
                 </TableCell>
                 <TableCell className="font-mono">
-                  {game.w === walletAddress ? "You" : formatAddress(game.w)}
+                  {renderString(game.w)}
                 </TableCell>
                 <TableCell className="font-mono">
-                  {game.b === walletAddress ? "You" : formatAddress(game.b)}
+                  {renderString(game.b)}
                 </TableCell>
                 <TableCell className="text-right">
                   {renderActionForGame(game)}

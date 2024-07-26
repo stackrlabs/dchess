@@ -70,6 +70,11 @@ const move: STF<ChessState, MoveInput> = {
     if (msgSender !== game.w && msgSender !== game.b) {
       throw new Error("Player not in game");
     }
+
+    if (game.startedAt === 0) {
+      throw new Error("Game not started");
+    }
+    
     const gameBoard = game.board;
     if (!gameBoard.move(move)) {
       throw new Error("Invalid move");

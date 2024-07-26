@@ -12,14 +12,14 @@ npm start
 
 ### Run using Docker :whale:
 
-- Build the image using the following command: (make sure you replace \`<NPM_TOKEN>\` with the actual value)
+- Build the image using the following command:
 
 ```bash
 # For Linux
-docker build -t dchess:latest . --build-arg NPM_TOKEN=<NPM_TOKEN>
+docker build -t dchess:latest .
 
 # For Mac with Apple Silicon chips
-docker buildx build --platform linux/amd64,linux/arm64 -t dchess:latest . --build-arg NPM_TOKEN=<NPM_TOKEN>
+docker buildx build --platform linux/amd64,linux/arm64 -t dchess:latest .
 ```
 
 - Run the Docker container using the following command:

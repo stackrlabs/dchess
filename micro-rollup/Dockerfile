@@ -1,17 +1,11 @@
 FROM node:lts-bookworm-slim
 
-ARG NPM_TOKEN
-ENV NPM_TOKEN $NPM_TOKEN
-
 RUN npm install -g npm@latest
 
 # Install bun globally
 RUN npm install -g bun
 
 WORKDIR /app
-
-# Set the NPM token for private package access
-RUN echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >.npmrc
 
 # Copy env files
 COPY .env .env

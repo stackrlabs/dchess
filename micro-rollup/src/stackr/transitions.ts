@@ -1,4 +1,4 @@
-import { STF, Transitions } from "@stackr/sdk/machine";
+import { Hook, Hooks, STF, Transitions } from "@stackr/sdk/machine";
 import { Chess } from "chess.js";
 import { ZeroAddress, solidityPackedKeccak256 } from "ethers";
 import { ChessState } from "./state";
@@ -8,10 +8,10 @@ type JoinGameInput = { gameId: string };
 type MoveInput = { gameId: string; move: string };
 
 const createGame: STF<ChessState, StartGameInput> = {
-  handler: ({ state, inputs, msgSender }) => {
+  handler: ({ state, inputs, msgSender, block }) => {
     const gameId = solidityPackedKeccak256(
       ["uint256", "string"],
-      [state.games.length, Date.now().toString()]
+      [state.games.length, block.timestamp]
     );
     const { color } = inputs;
     if (color !== "w" && color !== "b") {
@@ -23,7 +23,8 @@ const createGame: STF<ChessState, StartGameInput> = {
     state.games[gameId] = {
       w: String(w),
       b: String(b),
-      startTime: 0,
+      createdAt: block.timestamp,
+      startedAt: 0,
       board: new Chess(),
     };
 
@@ -32,7 +33,7 @@ const createGame: STF<ChessState, StartGameInput> = {
 };
 
 const joinGame: STF<ChessState, JoinGameInput> = {
-  handler: ({ state, inputs, msgSender }) => {
+  handler: ({ state, inputs, msgSender, block }) => {
     const { gameId } = inputs;
     const game = state.games[gameId];
     if (!game) {
@@ -45,7 +46,7 @@ const joinGame: STF<ChessState, JoinGameInput> = {
     const newPlayer = game.w === ZeroAddress ? "w" : "b";
 
     game[newPlayer] = String(msgSender);
-    game.startTime = Date.now();
+    game.startedAt = block.timestamp;
 
     return state;
   },
@@ -69,10 +70,30 @@ const move: STF<ChessState, MoveInput> = {
   },
 };
 
+const PRUNE_GAMES_INTERVAL = 300;
+const pruneGames: Hook<ChessState> = {
+  handler: ({ state, block }) => {
+    const { games } = state;
+    for (const [gameId, game] of Object.entries(games)) {
+      if (
+        game.startedAt === 0 &&
+        block.timestamp - game.createdAt > PRUNE_GAMES_INTERVAL
+      ) {
+        delete games[gameId];
+      }
+    }
+    return state;
+  },
+};
+
 const transitions: Transitions<ChessState> = {
   createGame,
   joinGame,
   move,
 };
 
-export { transitions };
+const hooks: Hooks<ChessState> = {
+  pruneGames,
+};
+
+export { hooks, transitions };

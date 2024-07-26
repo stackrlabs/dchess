@@ -8,6 +8,9 @@ const mru = await MicroRollup({
   config: stackrConfig,
   actionSchemas: [moveSchema],
   stateMachines: [chessStateMachine],
+  blockHooks: {
+    post: ["pruneGames"],
+  },
 });
 
 await mru.init();

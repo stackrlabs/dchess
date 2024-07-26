@@ -7,7 +7,8 @@ interface RawState {
     gameId: string;
     w: string;
     b: string;
-    startTime: number;
+    createdAt: number;
+    startedAt: number;
     boardFen: string;
   }[];
 }
@@ -15,7 +16,8 @@ interface RawState {
 type WrappedGame = {
   w: string;
   b: string;
-  startTime: number;
+  createdAt: number;
+  startedAt: number;
   board: Chess;
 };
 
@@ -32,12 +34,11 @@ export class ChessState extends State<RawState, AppState> {
     return {
       wrap: () => {
         const games = this.state.games.reduce((acc, game) => {
-          const chess = new Chess(game.boardFen);
-          acc[game.gameId] = {
-            w: game.w,
-            b: game.b,
-            startTime: game.startTime,
-            board: chess,
+          const { boardFen, gameId, ...rest } = game;
+          const board = new Chess(boardFen);
+          acc[gameId] = {
+            ...rest,
+            board,
           };
           return acc;
         }, {} as Record<string, WrappedGame>);
@@ -49,7 +50,8 @@ export class ChessState extends State<RawState, AppState> {
             gameId,
             w: game.w,
             b: game.b,
-            startTime: game.startTime,
+            startedAt: game.startedAt,
+            createdAt: game.createdAt,
             boardFen: game.board.fen(),
           })
         );

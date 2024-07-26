@@ -1,6 +1,6 @@
 import { Hook, Hooks, STF, Transitions } from "@stackr/sdk/machine";
 import { Chess } from "chess.js";
-import { ZeroAddress, solidityPackedKeccak256 } from "ethers";
+import { hashMessage, ZeroAddress } from "ethers";
 import { ChessState } from "./state";
 
 type StartGameInput = { color: "w" | "b" };
@@ -8,11 +8,9 @@ type JoinGameInput = { gameId: string };
 type MoveInput = { gameId: string; move: string };
 
 const createGame: STF<ChessState, StartGameInput> = {
-  handler: ({ state, inputs, msgSender, block }) => {
-    const gameId = solidityPackedKeccak256(
-      ["uint256", "string"],
-      [state.games.length, block.timestamp]
-    );
+  handler: ({ state, inputs, msgSender, block, emit }) => {
+    const gameId = hashMessage(`${msgSender}${block.timestamp}`);
+
     const { color } = inputs;
     if (color !== "w" && color !== "b") {
       throw new Error("Invalid color");
@@ -27,6 +25,11 @@ const createGame: STF<ChessState, StartGameInput> = {
       startedAt: 0,
       board: new Chess(),
     };
+
+    emit({
+      name: "GameCreated",
+      value: gameId,
+    });
 
     return state;
   },
@@ -43,6 +46,11 @@ const joinGame: STF<ChessState, JoinGameInput> = {
     if (game.w !== ZeroAddress && game.b !== ZeroAddress) {
       throw new Error("Game already has two players");
     }
+
+    if (game.w === String(msgSender) || game.b === String(msgSender)) {
+      throw new Error("Player already in game");
+    }
+
     const newPlayer = game.w === ZeroAddress ? "w" : "b";
 
     game[newPlayer] = String(msgSender);
@@ -70,7 +78,7 @@ const move: STF<ChessState, MoveInput> = {
   },
 };
 
-const PRUNE_GAMES_INTERVAL = 300;
+const PRUNE_GAMES_INTERVAL = 300_000;
 const pruneGames: Hook<ChessState> = {
   handler: ({ state, block }) => {
     const { games } = state;

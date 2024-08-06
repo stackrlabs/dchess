@@ -2,6 +2,7 @@
 
 import { GameWithId, getGames } from "@/api/api";
 import { useAction } from "@/api/useAction";
+import { CreateGame } from "@/components/create-game";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -12,23 +13,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useAddress } from "@/hooks/useAddress";
-import { formatAddress } from "@/lib/utils";
+import { formatHash } from "@/lib/utils";
+import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 
 export default function Home() {
   const { submit } = useAction();
-  const router = useRouter();
   const { data } = useSWR("games", () => getGames());
+  const { ready } = usePrivy();
   const { renderString, walletAddress } = useAddress();
-
-  const handleCreateGame = async () => {
-    const { logs } = await submit("createGame", {
-      color: "w",
-    });
-    const gameId = logs[0].value;
-    router.push(`/game/${gameId}`);
-  };
+  const router = useRouter();
 
   const handleJoinGame = async (gameId: string) => {
     await submit("joinGame", { gameId });
@@ -50,11 +45,18 @@ export default function Home() {
     return <Button onClick={() => handleJoinGame(gameId)}>Join</Button>;
   };
 
+  if (!ready) {
+    return (
+      <main className="flex min-h-screen flex-col gap-8 py-6">
+        <div className="flex gap-6 items-center">Logging you in...</div>
+      </main>
+    );
+  }
+
   return (
-    <main className="flex min-h-screen flex-col gap-8 p-24">
+    <main className="flex min-h-screen flex-col gap-8 py-6">
       <div className="flex gap-6 items-center">
-        <Button onClick={handleCreateGame}>Create Game</Button>
-        {/* <JoinGame /> */}
+        <CreateGame />
       </div>
       {data && data.length > 0 && (
         <Table>
@@ -70,7 +72,7 @@ export default function Home() {
             {data.map((game) => (
               <TableRow key={game.gameId}>
                 <TableCell className="font-medium font-mono">
-                  {formatAddress(game.gameId)}
+                  {formatHash(game.gameId)}
                 </TableCell>
                 <TableCell className="font-mono">
                   {renderString(game.w)}

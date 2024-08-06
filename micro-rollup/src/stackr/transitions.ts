@@ -9,7 +9,9 @@ type MoveInput = { gameId: string; move: string };
 
 const createGame: STF<ChessState, StartGameInput> = {
   handler: ({ state, inputs, msgSender, block, emit }) => {
-    const gameId = hashMessage(`${msgSender}${block.timestamp}`);
+    const gameId = hashMessage(
+      `${msgSender}::${block.timestamp}::${Object.keys(state.games).length}`
+    );
 
     const { color } = inputs;
     if (color !== "w" && color !== "b") {
@@ -23,6 +25,8 @@ const createGame: STF<ChessState, StartGameInput> = {
       b: String(b),
       createdAt: block.timestamp,
       startedAt: 0,
+      endedAt: 0,
+      status: "in_play",
       board: new Chess(),
     };
 
@@ -61,7 +65,7 @@ const joinGame: STF<ChessState, JoinGameInput> = {
 };
 
 const move: STF<ChessState, MoveInput> = {
-  handler: ({ state, inputs, msgSender }) => {
+  handler: ({ state, inputs, msgSender, emit }) => {
     const { gameId, move } = inputs;
     const game = state.games[gameId];
     if (!game) {
@@ -71,14 +75,37 @@ const move: STF<ChessState, MoveInput> = {
       throw new Error("Player not in game");
     }
 
+    if (msgSender !== game[game.board.turn()]) {
+      throw new Error("Not your turn");
+    }
+
     if (game.startedAt === 0) {
       throw new Error("Game not started");
     }
-    
+
+    if (game.endedAt !== 0) {
+      throw new Error("Game ended");
+    }
+
     const gameBoard = game.board;
     if (!gameBoard.move(move)) {
       throw new Error("Invalid move");
     }
+
+    if (gameBoard.isGameOver()) {
+      game.endedAt = Date.now();
+      if (gameBoard.isCheckmate()) {
+        game.status = gameBoard.turn() === "w" ? "b" : "w";
+      } else {
+        game.status = "draw";
+      }
+
+      emit({
+        name: "GameEnded",
+        value: game.status,
+      });
+    }
+
     return state;
   },
 };

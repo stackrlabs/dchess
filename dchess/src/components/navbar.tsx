@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
+import { formatHash } from "@/lib/utils";
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
@@ -16,9 +17,9 @@ export const Navbar = () => {
         dChess
       </Link>
       <div className="flex gap-4 text-center place-items-center">
-        {!!user && (
+        {!!walletAddress && (
           <div className="flex gap-2 cursor-pointer">
-            <p className="font-mono">{walletAddress || ".."}</p>
+            <p className="font-mono">{formatHash(walletAddress)}</p>
             <LogOut onClick={logout} />
           </div>
         )}

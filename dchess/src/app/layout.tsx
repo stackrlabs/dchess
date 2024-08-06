@@ -10,6 +10,13 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "dChess",
   description: "Chess on-chain",
+  icons: [
+    {
+      rel: "icon",
+      type: "image/png",
+      url: "./icon.png",
+    },
+  ],
 };
 
 export default function RootLayout({

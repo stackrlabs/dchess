@@ -5,6 +5,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatAddress(address: string) {
+export function formatHash(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }

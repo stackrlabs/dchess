@@ -9,6 +9,8 @@ interface RawState {
     b: string;
     createdAt: number;
     startedAt: number;
+    endedAt: number;
+    status: "in_play" | "draw" | "w" | "b";
     boardFen: string;
   }[];
 }
@@ -18,6 +20,8 @@ type WrappedGame = {
   b: string;
   createdAt: number;
   startedAt: number;
+  endedAt: number;
+  status: "in_play" | "draw" | "w" | "b";
   board: Chess;
 };
 
@@ -52,6 +56,8 @@ export class ChessState extends State<RawState, AppState> {
             b: game.b,
             startedAt: game.startedAt,
             createdAt: game.createdAt,
+            endedAt: game.endedAt,
+            status: game.status,
             boardFen: game.board.fen(),
           })
         );

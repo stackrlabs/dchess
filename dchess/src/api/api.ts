@@ -29,18 +29,25 @@ export interface GameWithId extends Game {
   gameId: string;
 }
 
+export type GameStatus = "in_play" | "draw" | "w" | "b";
+
 export interface Game {
   w: string;
   b: string;
   startedAt: number;
   createdAt: number;
+  endedAt: number;
   board: string;
+  status: GameStatus;
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const get = async <T>(path: string): Promise<T> => {
   const res = await fetch(`${BASE_URL}/${path}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch ${path}`);
+  }
   return res.json();
 };
 

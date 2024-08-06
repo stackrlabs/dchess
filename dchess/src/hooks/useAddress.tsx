@@ -1,5 +1,5 @@
 import { ZeroAddress } from "@/lib/constants";
-import { formatAddress } from "@/lib/utils";
+import { formatHash } from "@/lib/utils";
 import { usePrivy } from "@privy-io/react-auth";
 
 export const useAddress = () => {
@@ -12,7 +12,7 @@ export const useAddress = () => {
     if (address === ZeroAddress) {
       return "None yet";
     }
-    return formatAddress(address);
+    return formatHash(address);
   };
   return { renderString, walletAddress };
 };

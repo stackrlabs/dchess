@@ -1,9 +1,11 @@
 "use client";
-import { getGame } from "@/api/api";
+import { GameStatus, getGame } from "@/api/api";
 import { useAction } from "@/api/useAction";
 import { useAddress } from "@/hooks/useAddress";
 import { ZeroAddress } from "@/lib/constants";
+import { formatHash } from "@/lib/utils";
 import { Chess, Move } from "chess.js";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import useSWR from "swr";
@@ -18,6 +20,7 @@ export default function Game(props: GameProps) {
   const { params } = props;
   const { slug } = params;
   const { walletAddress, renderString } = useAddress();
+  const router = useRouter();
   const { data, isLoading, error } = useSWR(
     `games/${slug}`,
     () => getGame(slug),
@@ -25,6 +28,7 @@ export default function Game(props: GameProps) {
       refreshInterval: 2000,
     }
   );
+
   const { submit } = useAction();
   const [game, setGame] = useState(new Chess().fen());
 
@@ -60,44 +64,79 @@ export default function Game(props: GameProps) {
     return true;
   }
 
-  if (isLoading || !data || !walletAddress) {
+  if (isLoading || !walletAddress) {
     return <div>Loading...</div>;
   }
 
-  if (error) {
-    return <div>Error: {error.message}</div>;
+  if (!isLoading || error) {
+    router.push("/");
+    return null;
   }
 
-  const { w, b, startedAt } = data;
+  if (!data) {
+    return <div>Game not found</div>;
+  }
+
+  const { w, b, startedAt, endedAt, status } = data;
+
+  const currentPlayer = b === walletAddress ? "b" : "w";
+  const otherPlayer = currentPlayer === "w" ? "b" : "w";
+
+  const getGameStatus = (status: GameStatus) => {
+    if (status === "in_play") {
+      return "";
+    }
+    if (status === "draw") {
+      return "Draw";
+    }
+    if (status === "w") {
+      return `${renderString(w)} (w) won`;
+    }
+    if (status === "b") {
+      return `${renderString(b)} (b) won`;
+    }
+  };
+
+  const turn = game?.split(" ")?.[1] as "w" | "b";
 
   return (
     <div className="flex justify-center mt-6 self-center flex-col gap-4">
       <div className="flex flex-col justify-between">
-        <p>
-          <b>Game ID:</b> <span className="font-mono">{slug}</span>
-        </p>
-        <p>
-          <b>P1 (w):</b> <span className="font-mono">{renderString(w)}</span>
-        </p>
-        <p>
-          <b>P2 (b):</b> <span className="font-mono">{renderString(b)}</span>
-        </p>
-        <p>
-          <b>Turn:</b> {game.split(" ")[1] === "w" ? "White" : "Black"}
-        </p>
+        <div className="flex gap-20 text-lg">
+          <p>
+            <b>Game ID:</b>{" "}
+            <span className="font-mono">{formatHash(slug)}</span>
+          </p>
+          <p>
+            <b>Turn:</b> {turn === "w" ? "White" : "Black"}
+          </p>
+          <p>
+            <b>Status:</b> {endedAt > 0 ? getGameStatus(status) : "In Play"}
+          </p>
+        </div>
+      </div>
+      <div>
+        <b>Not You</b>{" "}
+        <p className="font-mono">{formatHash(data[otherPlayer])}</p>
       </div>
       <Chessboard
         boardWidth={600}
         position={game}
         onPieceDrop={onDrop}
-        boardOrientation={b === walletAddress ? "black" : "white"}
+        boardOrientation={currentPlayer === "w" ? "white" : "black"}
         arePiecesDraggable={
-          startedAt > 0 &&
-          (w === walletAddress || walletAddress === b) &&
-          w !== ZeroAddress &&
-          b !== ZeroAddress
+          (startedAt > 0 &&
+            (w === walletAddress || walletAddress === b) &&
+            w !== ZeroAddress &&
+            b !== ZeroAddress &&
+            walletAddress === data[turn]) ||
+          !new Chess(game).isGameOver()
         }
       />
+      <div>
+        <b>You</b>{" "}
+        <p className="font-mono">{formatHash(data[currentPlayer])}</p>
+      </div>
     </div>
   );
 }

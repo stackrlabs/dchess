@@ -5,6 +5,7 @@ import { usePrivy } from "@privy-io/react-auth";
 export const useAddress = () => {
   const { user } = usePrivy();
   const walletAddress = user?.wallet?.address;
+
   const renderString = (address: string) => {
     if (walletAddress === address) {
       return "You";

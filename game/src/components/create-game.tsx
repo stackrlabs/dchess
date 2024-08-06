@@ -11,12 +11,17 @@ export const CreateGame = () => {
 
   const handleCreateGame = async () => {
     setLoading(true);
-    const { logs } = await submit("createGame", {
-      color: "w",
-    });
-    const gameId = logs[0].value;
-    setLoading(false);
-    router.push(`/game/${gameId}`);
+    try {
+      const { logs } = await submit("createGame", {
+        color: "w",
+      });
+      const gameId = logs[0].value;
+      router.push(`/game/${gameId}`);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

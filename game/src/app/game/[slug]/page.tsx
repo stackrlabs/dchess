@@ -64,11 +64,11 @@ export default function Game(props: GameProps) {
     return true;
   }
 
-  if (isLoading || !walletAddress) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (!isLoading || error) {
+  if (!isLoading && error) {
     router.push("/");
     return null;
   }
@@ -78,6 +78,8 @@ export default function Game(props: GameProps) {
   }
 
   const { w, b, startedAt, endedAt, status } = data;
+
+  const isGuest = walletAddress !== w && walletAddress !== b;
 
   const currentPlayer = b === walletAddress ? "b" : "w";
   const otherPlayer = currentPlayer === "w" ? "b" : "w";
@@ -134,7 +136,7 @@ export default function Game(props: GameProps) {
         }
       />
       <div>
-        <b>You</b>{" "}
+        <b>{isGuest ? "Not You again!" : "You"}</b>{" "}
         <p className="font-mono">{formatHash(data[currentPlayer])}</p>
       </div>
     </div>

@@ -1,13 +1,14 @@
 "use client";
-import { useAuth } from "@/hooks/useAuth";
+import { formatHash } from "@/lib/utils";
+import { usePrivy } from "@privy-io/react-auth";
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
-import { formatHash } from "@/lib/utils";
 
 export const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout } = usePrivy();
   const walletAddress = user?.wallet?.address;
+
   return (
     <div className="flex justify-between">
       <Link

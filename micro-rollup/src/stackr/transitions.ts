@@ -1,4 +1,4 @@
-import { Hook, Hooks, STF, Transitions } from "@stackr/sdk/machine";
+import { Hook, Hooks, REQUIRE, STF, Transitions } from "@stackr/sdk/machine";
 import { Chess } from "chess.js";
 import { hashMessage, ZeroAddress } from "ethers";
 import { ChessState } from "./state";
@@ -14,9 +14,7 @@ const createGame: STF<ChessState, StartGameInput> = {
     );
 
     const { color } = inputs;
-    if (color !== "w" && color !== "b") {
-      throw new Error("Invalid color");
-    }
+    REQUIRE(color === "w" || color === "b", "INVALID_COLOR");
     const w = color === "w" ? msgSender : ZeroAddress;
     const b = color === "b" ? msgSender : ZeroAddress;
 
@@ -44,16 +42,15 @@ const joinGame: STF<ChessState, JoinGameInput> = {
     const { gameId } = inputs;
     const game = state.games[gameId];
     if (!game) {
-      throw new Error("Game not found");
+      throw new Error("GAME_NOT_FOUND");
     }
 
-    if (game.w !== ZeroAddress && game.b !== ZeroAddress) {
-      throw new Error("Game already has two players");
-    }
-
-    if (game.w === String(msgSender) || game.b === String(msgSender)) {
-      throw new Error("Player already in game");
-    }
+    REQUIRE(game.w !== ZeroAddress || game.b !== ZeroAddress, "GAME_FULL");
+    REQUIRE(game.startedAt === 0, "GAME_STARTED");
+    REQUIRE(
+      game.w !== String(msgSender) && game.b !== String(msgSender),
+      "ALREADY_IN_GAME"
+    );
 
     const newPlayer = game.w === ZeroAddress ? "w" : "b";
 
@@ -71,21 +68,11 @@ const move: STF<ChessState, MoveInput> = {
     if (!game) {
       throw new Error("Game not found");
     }
-    if (msgSender !== game.w && msgSender !== game.b) {
-      throw new Error("Player not in game");
-    }
 
-    if (msgSender !== game[game.board.turn()]) {
-      throw new Error("Not your turn");
-    }
-
-    if (game.startedAt === 0) {
-      throw new Error("Game not started");
-    }
-
-    if (game.endedAt !== 0) {
-      throw new Error("Game ended");
-    }
+    REQUIRE(game.startedAt !== 0, "GAME_NOT_STARTED");
+    REQUIRE(msgSender === game.w || msgSender === game.b, "PLAYER_NOT_IN_GAME");
+    REQUIRE(msgSender === game[game.board.turn()], "NOT_YOUR_TURN");
+    REQUIRE(game.endedAt === 0, "GAME_ENDED");
 
     const gameBoard = game.board;
     if (!gameBoard.move(move)) {

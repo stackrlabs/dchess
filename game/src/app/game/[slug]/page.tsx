@@ -45,7 +45,7 @@ export default function Game(props: GameProps) {
     return result;
   }
 
-  function onDrop(sourceSquare: string, targetSquare: string) {
+  function onDrop(sourceSquare: string, targetSquare: string, piece: string) {
     if (walletAddress !== data?.w && walletAddress !== data?.b) {
       return false;
     }
@@ -53,6 +53,7 @@ export default function Game(props: GameProps) {
     const move = makeAMove({
       from: sourceSquare,
       to: targetSquare,
+      promotion: piece.slice(-1).toLowerCase(),
     } as Move);
 
     // illegal move

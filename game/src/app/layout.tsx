@@ -34,9 +34,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Providers>
-            <div className="flex flex-col p-8 max-h-[100vh] max-w-[100vw]">
+            <div className="flex flex-col p-8 h-[100vh] w-[100vw]">
               <Navbar />
-              <div className="flex-1">{children}</div>
+              {children}
             </div>
           </Providers>
         </ThemeProvider>

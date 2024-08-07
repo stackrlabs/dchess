@@ -7,7 +7,7 @@ import { formatAddress, formatHash } from "@/lib/utils";
 import { usePrivy } from "@privy-io/react-auth";
 import { Chess, Move } from "chess.js";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import useSWR from "swr";
 import useSound from "use-sound";
@@ -18,6 +18,7 @@ interface GameProps {
   };
 }
 
+const MIN_WIDTH = 32;
 export default function Game(props: GameProps) {
   const { params } = props;
   const { slug } = params;
@@ -34,6 +35,7 @@ export default function Game(props: GameProps) {
 
   const { submit } = useAction();
   const [game, setGame] = useState(new Chess());
+  const ref = useRef<HTMLDivElement>(null);
 
   const [selfMove] = useSound("../../../sounds/move-self.mp3");
   const [capture] = useSound("../../../sounds/capture.mp3");
@@ -153,14 +155,15 @@ export default function Game(props: GameProps) {
     }
   };
 
+  const width = Math.min(
+    ref.current?.clientWidth || MIN_WIDTH * 2,
+    ref.current?.clientHeight || MIN_WIDTH * 2
+  );
+
   return (
-    <div className="w-full h-full flex flex-1 justify-center mt-6 self-center flex-col gap-4">
+    <div className="flex flex-1 w-full justify-center mt-6 self-center flex-col gap-4">
       <div className="flex flex-col justify-between">
         <div className="flex gap-20 text-lg">
-          <p>
-            <b>Game ID:</b>{" "}
-            <span className="font-mono">{formatHash(slug)}</span>
-          </p>
           <p>
             <b>Turn:</b> {turn === "w" ? "White" : "Black"}
           </p>
@@ -169,26 +172,28 @@ export default function Game(props: GameProps) {
           </p>
         </div>
       </div>
+
       <div>
         <b>Not You</b>{" "}
         <p className="font-mono">{formatAddress(remoteGame[otherPlayer])}</p>
       </div>
-
-      <Chessboard
-        id={slug}
-        boardWidth={600}
-        position={game.fen()}
-        onPieceDrop={onDrop}
-        boardOrientation={currentPlayer === "w" ? "white" : "black"}
-        arePiecesDraggable={
-          startedAt > 0 &&
-          (w === walletAddress || walletAddress === b) &&
-          w !== ZeroAddress &&
-          b !== ZeroAddress &&
-          walletAddress === remoteGame[turn] &&
-          !game.isGameOver()
-        }
-      />
+      <div ref={ref} className="flex-1 w-full content-center">
+        <Chessboard
+          id={slug}
+          boardWidth={width - MIN_WIDTH}
+          position={game.fen()}
+          onPieceDrop={onDrop}
+          boardOrientation={currentPlayer === "w" ? "white" : "black"}
+          arePiecesDraggable={
+            startedAt > 0 &&
+            (w === walletAddress || walletAddress === b) &&
+            w !== ZeroAddress &&
+            b !== ZeroAddress &&
+            walletAddress === remoteGame[turn] &&
+            !game.isGameOver()
+          }
+        />
+      </div>
       <div>
         <b>{isGuest ? "Not You again!" : "You"}</b>{" "}
         <p className="font-mono">{formatAddress(remoteGame[currentPlayer])}</p>

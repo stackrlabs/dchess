@@ -3,7 +3,7 @@ import { GameStatus, getGame } from "@/api/api";
 import { useAction } from "@/api/useAction";
 import { useAddress } from "@/hooks/useAddress";
 import { ZeroAddress } from "@/lib/constants";
-import { formatHash } from "@/lib/utils";
+import { formatAddress, formatHash } from "@/lib/utils";
 import { usePrivy } from "@privy-io/react-auth";
 import { Chess, Move } from "chess.js";
 import { useRouter } from "next/navigation";
@@ -89,7 +89,6 @@ export default function Game(props: GameProps) {
 
     const remoteBoard = new Chess(remoteGame.board);
     if (numberOfMoves(remoteBoard) > numberOfMoves(game)) {
-      console.log("remote move");
       updateBoard(remoteBoard);
     }
   }, [remoteGame, game, updateBoard]);
@@ -155,7 +154,7 @@ export default function Game(props: GameProps) {
   };
 
   return (
-    <div className="w-full flex flex-1 justify-center mt-6 self-center flex-col gap-4">
+    <div className="w-full h-full flex flex-1 justify-center mt-6 self-center flex-col gap-4">
       <div className="flex flex-col justify-between">
         <div className="flex gap-20 text-lg">
           <p>
@@ -172,9 +171,11 @@ export default function Game(props: GameProps) {
       </div>
       <div>
         <b>Not You</b>{" "}
-        <p className="font-mono">{renderString(remoteGame[otherPlayer])}</p>
+        <p className="font-mono">{formatAddress(remoteGame[otherPlayer])}</p>
       </div>
+
       <Chessboard
+        id={slug}
         boardWidth={600}
         position={game.fen()}
         onPieceDrop={onDrop}
@@ -190,7 +191,7 @@ export default function Game(props: GameProps) {
       />
       <div>
         <b>{isGuest ? "Not You again!" : "You"}</b>{" "}
-        <p className="font-mono">{renderString(remoteGame[currentPlayer])}</p>
+        <p className="font-mono">{formatAddress(remoteGame[currentPlayer])}</p>
       </div>
     </div>
   );

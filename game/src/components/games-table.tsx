@@ -50,8 +50,12 @@ export const GameTable = () => {
 
   const renderActionForGame = (game: GameWithId) => {
     const { w, b, gameId, startedAt, endedAt } = game;
-    if (!user) {
-      return <Button onClick={() => handleViewGame(gameId)}>Watch</Button>;
+    if (!user || !!endedAt) {
+      return (
+        <Button onClick={() => handleViewGame(gameId)}>
+          {endedAt ? "Analyze" : "Watch"}
+        </Button>
+      );
     }
 
     if (w === walletAddress || b === walletAddress) {

@@ -24,8 +24,7 @@ export const Navbar = () => {
         {!!walletAddress && (
           <div className="flex gap-4 items-center">
             <p className="font-mono">
-              <b>Embedded Wallet:</b>{" "}
-              {formatHash(user?.wallet?.address || "...")}
+              <b>AA Wallet:</b> {formatHash(user?.wallet?.address || "...")}
             </p>
             <Button onClick={logout} variant="outline" size="icon">
               <LogOut />

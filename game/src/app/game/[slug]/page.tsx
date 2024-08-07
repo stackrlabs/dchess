@@ -3,7 +3,7 @@ import { GameStatus, getGame } from "@/api/api";
 import { useAction } from "@/api/useAction";
 import { useAddress } from "@/hooks/useAddress";
 import { ZeroAddress } from "@/lib/constants";
-import { formatAddress, formatHash } from "@/lib/utils";
+import { formatAddress } from "@/lib/utils";
 import { usePrivy } from "@privy-io/react-auth";
 import { Chess, Move } from "chess.js";
 import { useRouter } from "next/navigation";
@@ -64,9 +64,8 @@ export default function Game(props: GameProps) {
         if (lastMove.promotion) {
           return promote();
         }
+        selfMove();
       }
-
-      selfMove();
     },
     [capture, check, notify, promote, selfMove]
   );
@@ -180,7 +179,7 @@ export default function Game(props: GameProps) {
       <div ref={ref} className="flex-1 w-full content-center">
         <Chessboard
           id={slug}
-          boardWidth={width - MIN_WIDTH}
+          boardWidth={width}
           position={game.fen()}
           onPieceDrop={onDrop}
           boardOrientation={currentPlayer === "w" ? "white" : "black"}

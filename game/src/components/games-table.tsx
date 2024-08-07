@@ -3,18 +3,11 @@
 import { Game, GameWithId, getGames } from "@/api/api";
 import { useAction } from "@/api/useAction";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useAddress } from "@/hooks/useAddress";
 import { formatHash } from "@/lib/utils";
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
+import { Chessboard } from "react-chessboard";
 import useSWR from "swr";
 
 export const GameTable = () => {
@@ -27,16 +20,20 @@ export const GameTable = () => {
   const getGameStatus = (game: Game) => {
     const { status, w, b } = game;
     if (status === "in_play") {
-      return "In Play";
-    }
-    if (status === "draw") {
-      return "Draw";
-    }
+      return "LIVE";
+    } else return "ENDED";
+  };
+
+  const getWinner = (game: Game) => {
+    const { status, w, b } = game;
     if (status === "w") {
-      return `${formatHash(w)} (w) won`;
+      return "P1 WON";
     }
     if (status === "b") {
-      return `${formatHash(b)} (b) won`;
+      return "P2 WON";
+    }
+    if (status === "draw") {
+      return "DRAW";
     }
   };
 
@@ -71,40 +68,62 @@ export const GameTable = () => {
   };
 
   return (
-    <>
-      <h3 className="text-2xl font-bold">Games</h3>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Game</TableHead>
-            <TableHead>Player 1</TableHead>
-            <TableHead>Player 2</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right"></TableHead>
-          </TableRow>
-        </TableHeader>
-        {!!data?.length && ready && (
-          <TableBody>
-            {data.map((game) => (
-              <TableRow key={game.gameId}>
-                <TableCell className="font-medium font-mono">
-                  {formatHash(game.gameId)}
-                </TableCell>
-                <TableCell className="font-mono">
-                  {renderString(game.w)}
-                </TableCell>
-                <TableCell className="font-mono">
-                  {renderString(game.b)}
-                </TableCell>
-                <TableCell>{getGameStatus(game)}</TableCell>
-                <TableCell className="text-right">
+    <div className="">
+      <div className="grid grid-cols-3 gap-4">
+        {data &&
+          ready &&
+          data.map((game) => (
+            <div
+              key={game.gameId}
+              className="border border-gray-500 p-6 group relative"
+            >
+              <div className="flex gap-4 duration-200 relative">
+                <div className="absolute h-full w-full flex justify-center items-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-50">
                   <div className="flex gap-2">{renderActionForGame(game)}</div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        )}
-      </Table>
-    </>
+                </div>
+                <div className="duration-200 z-10 group-hover:blur-sm">
+                  <Chessboard boardWidth={200} position={game.board} />
+                </div>
+                <div className="flex-1 transition-all group-hover:blur-sm">
+                  <div className="font-mono flex flex-col justify-between h-full">
+                    <div className="">
+                      <div className="flex gap-2">
+                        <div
+                          className={`${game.status === "in_play" ? "bg-green-500" : "bg-red-400"} px-2 w-fit text-black rounded`}
+                        >
+                          {getGameStatus(game)}
+                        </div>
+                        {getWinner(game) && (
+                          <div className="bg-white px-2 w-fit text-black rounded">
+                            {getWinner(game)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-lg">{formatHash(game.gameId)}</div>
+                    </div>
+
+                    <div className="">
+                      <div className="font-mono flex flex-col gap-2 text-[1rem]">
+                        <div className="flex gap-2">
+                          <div className="bg-white px-1 text-black rounded">
+                            P1
+                          </div>
+                          {renderString(game.w)}
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="bg-gray-800 px-1 text-white border border-white rounded">
+                            P2
+                          </div>
+                          {renderString(game.b)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+      </div>
+    </div>
   );
 };

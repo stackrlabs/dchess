@@ -39,6 +39,8 @@ export interface Game {
   endedAt: number;
   board: string;
   status: GameStatus;
+  wEns: string;
+  bEns: string;
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -60,7 +62,7 @@ const getGame = async (slug: string) => {
 };
 
 const getGames = async () => {
-  const { games } = await get<{ games: GameWithId[] }>("");
+  const games = await get<GameWithId[]>("games");
   return games;
 };
 
@@ -77,4 +79,5 @@ const submitAction = async (path: string, data: any) => {
   return res.json();
 };
 
-export { getInfo, submitAction, getGame, getGames };
+export { getGame, getGames, getInfo, submitAction };
+

@@ -3,7 +3,7 @@ import { GameStatus, getGame } from "@/api/api";
 import { useAction } from "@/api/useAction";
 import { useAddress } from "@/hooks/useAddress";
 import { ZeroAddress } from "@/lib/constants";
-import { formatHash } from "@/lib/utils";
+import { formatAddress, formatHash } from "@/lib/utils";
 import { usePrivy } from "@privy-io/react-auth";
 import { Chess, Move } from "chess.js";
 import { useRouter } from "next/navigation";
@@ -152,7 +152,9 @@ export default function Game(props: GameProps) {
       </div>
       <div>
         <b>Not You</b>{" "}
-        <p className="font-mono">{formatHash(data[otherPlayer])}</p>
+        <p className="font-mono">
+          {formatAddress(data[`${otherPlayer}Ens`] ?? "")}
+        </p>
       </div>
       <Chessboard
         boardWidth={600}
@@ -170,7 +172,9 @@ export default function Game(props: GameProps) {
       />
       <div>
         <b>{isGuest ? "Not You again!" : "You"}</b>{" "}
-        <p className="font-mono">{formatHash(data[currentPlayer])}</p>
+        <p className="font-mono">
+          {formatAddress(data[`${currentPlayer}Ens`] ?? "")}
+        </p>
       </div>
     </div>
   );

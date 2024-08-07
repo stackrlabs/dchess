@@ -22,12 +22,14 @@ export function isDefined<T>(value: T | undefined | null): value is T {
   return value !== undefined && value !== null;
 }
 
-export function boardPieces(board: Chess) {
-  return board
+export function boardInfo(board: Chess) {
+  const pieces = board
     .board()
     .flat()
     .filter(isDefined)
-    .map((p) => p.type + p.color)
-    .sort()
-    .join("");
+    .map((p) => p.type + p.color);
+
+  const sortedPieces = pieces.sort().join("");
+  const pawnsCount = pieces.filter((p) => p[0] === "p").length;
+  return { sortedPieces, pawnsCount };
 }

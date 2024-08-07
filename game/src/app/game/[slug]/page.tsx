@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import useSWR from "swr";
+import useSound from "use-sound";
 
 interface GameProps {
   params: {
@@ -34,16 +35,48 @@ export default function Game(props: GameProps) {
   const { submit } = useAction();
   const [game, setGame] = useState(new Chess().fen());
 
+  const [selfMove] = useSound("../../../sounds/move-self.mp3");
+  const [capture] = useSound("../../../sounds/capture.mp3");
+  const [check] = useSound("../../../sounds/move-check.mp3");
+  const [notify] = useSound("../../../sounds/notify.mp3");
+  const [promote] = useSound("../../../sounds/promote.mp3");
+
   useEffect(() => {
     if (data) {
       setGame(data.board);
     }
   }, [data]);
 
+  const playSound = (board: Chess) => {
+    if (board.isGameOver()) {
+      return notify();
+    }
+
+    if (board.isCheck()) {
+      return check();
+    }
+
+    // if piece is captured
+    if (board.history().length > 0) {
+      const lastMove = board.history({ verbose: true })[
+        board.history().length - 1
+      ];
+      if (lastMove.captured) {
+        return capture();
+      }
+      if (lastMove.promotion) {
+        return promote();
+      }
+    }
+
+    selfMove();
+  };
+
   function makeAMove(move: Move | string) {
     const board = new Chess(game);
     const result = board.move(move);
     setGame(board.fen());
+    playSound(board);
     return result;
   }
 
@@ -60,6 +93,7 @@ export default function Game(props: GameProps) {
     }
 
     submit("move", { gameId: slug, move: move.san });
+
     return true;
   }
 

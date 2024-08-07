@@ -14,9 +14,9 @@ export const useAddress = () => {
       return "You";
     }
     if (address === ZeroAddress) {
-      return "None yet";
+      return "Not Joined";
     }
-    return formatAddress(connectedWallet);
+    return formatAddress(address);
   };
   return { renderString, walletAddress };
 };

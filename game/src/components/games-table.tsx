@@ -71,6 +71,7 @@ export const GameTable = () => {
     <div className="">
       <div className="grid grid-cols-3 gap-4">
         {data &&
+          ready &&
           data.map((game) => (
             <div
               key={game.gameId}

@@ -110,7 +110,7 @@ export default function Game(props: GameProps) {
     return <div>Game not found</div>;
   }
 
-  const { w, b, startedAt, endedAt, status } = data;
+  const { w, b, wEns, bEns, startedAt, endedAt, status } = data;
 
   const isGuest = walletAddress !== w && walletAddress !== b;
 
@@ -127,10 +127,10 @@ export default function Game(props: GameProps) {
       return "Draw";
     }
     if (status === "w") {
-      return `${renderString(w)} (w) won`;
+      return `${renderString(w, wEns)} (w) won`;
     }
     if (status === "b") {
-      return `${renderString(b)} (b) won`;
+      return `${renderString(b, bEns)} (b) won`;
     }
   };
 

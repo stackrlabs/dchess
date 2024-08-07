@@ -74,7 +74,7 @@ export const GameTable = () => {
   };
 
   return (
-    <div className="flex flex-wrap gap-4 w-full justify-center">
+    <div className="flex flex-wrap gap-4 w-full justify-center pb-2">
       {data &&
         ready &&
         data.map((game) => (
@@ -94,7 +94,7 @@ export const GameTable = () => {
               </div>
               <div className="flex-1 transition-all group-hover:blur-sm">
                 <div className="font-mono flex flex-col justify-between h-full">
-                  <div className="">
+                  <div>
                     <div className="flex gap-2">
                       <div
                         className={`${
@@ -114,7 +114,7 @@ export const GameTable = () => {
                     <div className="text-lg">{formatHash(game.gameId)}</div>
                   </div>
 
-                  <div className="">
+                  <div>
                     <div className="font-mono flex flex-col gap-2 text-[1rem]">
                       <div className="flex gap-2">
                         <div className="bg-white px-1 text-black rounded">

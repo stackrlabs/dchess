@@ -3,7 +3,7 @@ import { GameStatus, getGame } from "@/api/api";
 import { useAction } from "@/api/useAction";
 import { useAddress } from "@/hooks/useAddress";
 import { ZeroAddress } from "@/lib/constants";
-import { formatAddress } from "@/lib/utils";
+import { boardPieces, formatAddress } from "@/lib/utils";
 import { usePrivy } from "@privy-io/react-auth";
 import { Chess, Move } from "chess.js";
 import { useRouter } from "next/navigation";
@@ -35,16 +35,16 @@ export default function Game(props: GameProps) {
 
   const { submit } = useAction();
   const [game, setGame] = useState(new Chess());
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
   const ref = useRef<HTMLDivElement>(null);
 
   const [selfMove] = useSound("../../../sounds/move-self.mp3");
   const [capture] = useSound("../../../sounds/capture.mp3");
   const [check] = useSound("../../../sounds/move-check.mp3");
   const [notify] = useSound("../../../sounds/notify.mp3");
-  const [promote] = useSound("../../../sounds/promote.mp3");
 
   const playSound = useCallback(
-    (board: Chess) => {
+    (board: Chess, oldBoard: Chess) => {
       if (board.isGameOver()) {
         return notify();
       }
@@ -53,21 +53,13 @@ export default function Game(props: GameProps) {
         return check();
       }
 
-      // if piece is captured
-      if (board.history().length > 0) {
-        const lastMove = board.history({ verbose: true })[
-          board.history().length - 1
-        ];
-        if (lastMove.captured) {
-          return capture();
-        }
-        if (lastMove.promotion) {
-          return promote();
-        }
-        selfMove();
+      if (boardPieces(oldBoard) !== boardPieces(board)) {
+        return capture();
       }
+
+      selfMove();
     },
-    [capture, check, notify, promote, selfMove]
+    [capture, check, notify, selfMove]
   );
 
   const numberOfMoves = (board: Chess) => {
@@ -76,9 +68,13 @@ export default function Game(props: GameProps) {
   };
 
   const updateBoard = useCallback(
-    (board: Chess) => {
+    (board: Chess, oldBoard: Chess) => {
       setGame(board);
-      playSound(board);
+      if (isFirstLoad) {
+        setIsFirstLoad(false);
+      } else {
+        playSound(board, oldBoard);
+      }
     },
     [playSound]
   );
@@ -90,14 +86,14 @@ export default function Game(props: GameProps) {
 
     const remoteBoard = new Chess(remoteGame.board);
     if (numberOfMoves(remoteBoard) > numberOfMoves(game)) {
-      updateBoard(remoteBoard);
+      updateBoard(remoteBoard, game);
     }
   }, [remoteGame, game, updateBoard]);
 
   const makeAMove = (move: Move | string) => {
     const board = new Chess(game.fen());
     const res = board.move(move);
-    updateBoard(board);
+    updateBoard(board, game);
     return res;
   };
 

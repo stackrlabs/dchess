@@ -7,6 +7,7 @@ import { useAddress } from "@/hooks/useAddress";
 import { formatHash } from "@/lib/utils";
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Chessboard } from "react-chessboard";
 import useSWR from "swr";
 
@@ -17,6 +18,7 @@ export const GameTable = () => {
   });
   const { ready, user } = usePrivy();
   const { renderString, walletAddress } = useAddress();
+  const [joining, setJoining] = useState(false);
   const router = useRouter();
 
   const getGameStatus = (game: Game) => {
@@ -40,8 +42,10 @@ export const GameTable = () => {
   };
 
   const handleJoinGame = async (gameId: string) => {
+    setJoining(true);
     await submit("joinGame", { gameId });
     router.push(`/game/${gameId}`);
+    setJoining(false);
   };
 
   const handleViewGame = (gameId: string) => {
@@ -64,7 +68,9 @@ export const GameTable = () => {
     return (
       <>
         {!startedAt && !endedAt && (
-          <Button onClick={() => handleJoinGame(gameId)}>Join</Button>
+          <Button onClick={() => handleJoinGame(gameId)}>
+            {joining ? "Joining..." : "Join"}
+          </Button>
         )}
         {!endedAt && (
           <Button onClick={() => handleViewGame(gameId)}>Watch</Button>
@@ -90,6 +96,7 @@ export const GameTable = () => {
                 <Chessboard
                   boardWidth={screen.width > 768 ? 200 : 120}
                   position={game.board}
+                  arePiecesDraggable={false}
                 />
               </div>
               <div className="flex-1 transition-all group-hover:blur-sm">

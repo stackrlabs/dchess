@@ -4,8 +4,8 @@ import {
   MicroRollup,
 } from "@stackr/sdk";
 import express, { Request, Response } from "express";
-import { stackrConfig } from "../stackr.config.ts";
 
+import { stackrConfig } from "../stackr.config.ts";
 import * as schemas from "./stackr/actions.ts";
 import { chessStateMachine } from "./stackr/chess.machine.ts";
 import { transitions } from "./stackr/transitions.ts";
@@ -26,7 +26,6 @@ async function main() {
       post: ["pruneGames"],
     },
     stfSchemaMap,
-    isSandbox: true,
   });
 
   await mru.init();
@@ -50,7 +49,7 @@ async function main() {
     const transitionToSchema = mru.getStfSchemaMap();
     res.send({
       signingInstructions: "signTypedData(domain, schema.types, inputs)",
-      domain: stackrConfig.domain,
+      domain: mru.config.domain,
       transitionToSchema,
       schemas: Object.values(schemas).reduce((acc, schema) => {
         acc[schema.identifier] = {

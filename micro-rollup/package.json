@@ -7,7 +7,7 @@
     "test": "mocha --require ts-node/register src/**/*.test.ts"
   },
   "dependencies": {
-    "@stackr/sdk": "0.5.1",
+    "@stackr/sdk": "0.5.2",
     "chess.js": "^1.0.0-beta.8",
     "ethers": "^6.7.1",
     "express": "^4.19.2",

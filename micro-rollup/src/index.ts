@@ -6,7 +6,6 @@ import {
 import express, { Request, Response } from "express";
 import { stackrConfig } from "../stackr.config.ts";
 
-import { getDefaultProvider } from "ethers";
 import * as schemas from "./stackr/actions.ts";
 import { chessStateMachine } from "./stackr/chess.machine.ts";
 import { transitions } from "./stackr/transitions.ts";
@@ -16,25 +15,6 @@ const stfSchemaMap: Record<string, ActionSchema> = {
   createGame: createGameSchema,
   joinGame: joinGameSchema,
   move: moveSchema,
-};
-
-const ensCache = new Map<string, string>();
-
-const getAddressOrEns = async (address: string) => {
-  if (ensCache.has(address)) {
-    return ensCache.get(address)!;
-  }
-  try {
-    const ens = await getDefaultProvider(process.env.API_URL).lookupAddress(
-      address
-    );
-    const name = ens || address;
-    ensCache.set(address, name);
-    return name;
-  } catch (e) {
-    console.error(e);
-    return address;
-  }
 };
 
 async function main() {
@@ -120,31 +100,19 @@ async function main() {
       res.status(404).send({ message: "GAME_NOT_FOUND" });
       return;
     }
-    const [wEns, bEns] = await Promise.all([
-      getAddressOrEns(game.w),
-      getAddressOrEns(game.b),
-    ]);
+
     const { board, ...rest } = game;
-    return res.send({ ...rest, board: board.fen(), wEns, bEns });
+    return res.send({ ...rest, board: board.fen() });
   });
 
   app.get("/games", async (_req: Request, res: Response) => {
     const { games } = machine.state;
-    const uniquePlayers = new Set<string>();
-    Object.values(games).forEach((e) => {
-      uniquePlayers.add(e.w);
-      uniquePlayers.add(e.b);
-    });
-    const players = Array.from(uniquePlayers);
-    await Promise.all(players.map(getAddressOrEns));
 
     res.json(
       games.map((game) => {
         return {
           ...game,
           board: game.boardFen,
-          wEns: ensCache.get(game.w),
-          bEns: ensCache.get(game.b),
         };
       })
     );

@@ -1,6 +1,6 @@
 import { createConfig } from "@privy-io/wagmi";
-import { http } from "viem";
-import { sepolia } from "viem/chains";
+import { createPublicClient, http } from "viem";
+import { mainnet, sepolia } from "viem/chains";
 
 export function getConfig() {
   return createConfig({
@@ -10,3 +10,8 @@ export function getConfig() {
     },
   });
 }
+
+export const publicClient = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+});

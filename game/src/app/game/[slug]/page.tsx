@@ -110,7 +110,7 @@ export default function Game(props: GameProps) {
     return <div>Game not found</div>;
   }
 
-  const { w, b, wEns, bEns, startedAt, endedAt, status } = data;
+  const { w, b, startedAt, endedAt, status } = data;
 
   const isGuest = walletAddress !== w && walletAddress !== b;
 
@@ -127,10 +127,10 @@ export default function Game(props: GameProps) {
       return "Draw";
     }
     if (status === "w") {
-      return `${renderString(w, wEns)} (w) won`;
+      return `${renderString(w)} (w) won`;
     }
     if (status === "b") {
-      return `${renderString(b, bEns)} (b) won`;
+      return `${renderString(b)} (b) won`;
     }
   };
 
@@ -152,9 +152,7 @@ export default function Game(props: GameProps) {
       </div>
       <div>
         <b>Not You</b>{" "}
-        <p className="font-mono">
-          {formatAddress(data[`${otherPlayer}Ens`] ?? "")}
-        </p>
+        <p className="font-mono">{formatAddress(data[otherPlayer])}</p>
       </div>
       <Chessboard
         boardWidth={600}
@@ -172,9 +170,7 @@ export default function Game(props: GameProps) {
       />
       <div>
         <b>{isGuest ? "Not You again!" : "You"}</b>{" "}
-        <p className="font-mono">
-          {formatAddress(data[`${currentPlayer}Ens`] ?? "")}
-        </p>
+        <p className="font-mono">{formatAddress(data[currentPlayer])}</p>
       </div>
     </div>
   );

@@ -16,7 +16,7 @@ export default function Home() {
           <CreateGame />
         ) : (
           <Button disabled={disableLogin} onClick={login}>
-            Log in to play
+            Connect Wallet to Play
           </Button>
         )}
       </div>

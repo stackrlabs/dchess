@@ -1,6 +1,6 @@
 "use client";
 
-import { GameWithId, getGames } from "@/api/api";
+import { Game, GameWithId, getGames } from "@/api/api";
 import { useAction } from "@/api/useAction";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +24,22 @@ export const GameTable = () => {
   const { renderString, walletAddress } = useAddress();
   const router = useRouter();
 
+  const getGameStatus = (game: Game) => {
+    const { status, w, b } = game;
+    if (status === "in_play") {
+      return "In Play";
+    }
+    if (status === "draw") {
+      return "Draw";
+    }
+    if (status === "w") {
+      return `${formatHash(w)} (w) won`;
+    }
+    if (status === "b") {
+      return `${formatHash(b)} (b) won`;
+    }
+  };
+
   const handleJoinGame = async (gameId: string) => {
     await submit("joinGame", { gameId });
     router.push(`/game/${gameId}`);
@@ -43,14 +59,14 @@ export const GameTable = () => {
       return <Button onClick={() => handleViewGame(gameId)}>Continue</Button>;
     }
     return (
-      <div className="flex gap-2">
+      <>
         {!startedAt && !endedAt && (
           <Button onClick={() => handleJoinGame(gameId)}>Join</Button>
         )}
         {!endedAt && (
           <Button onClick={() => handleViewGame(gameId)}>Watch</Button>
         )}
-      </div>
+      </>
     );
   };
 
@@ -63,10 +79,11 @@ export const GameTable = () => {
             <TableHead>Game</TableHead>
             <TableHead>Player 1</TableHead>
             <TableHead>Player 2</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead className="text-right"></TableHead>
           </TableRow>
         </TableHeader>
-        {!!data?.length && (
+        {!!data?.length && ready && (
           <TableBody>
             {data.map((game) => (
               <TableRow key={game.gameId}>
@@ -79,8 +96,9 @@ export const GameTable = () => {
                 <TableCell className="font-mono">
                   {renderString(game.b)}
                 </TableCell>
+                <TableCell>{getGameStatus(game)}</TableCell>
                 <TableCell className="text-right">
-                  {renderActionForGame(game)}
+                  <div className="flex gap-2">{renderActionForGame(game)}</div>
                 </TableCell>
               </TableRow>
             ))}

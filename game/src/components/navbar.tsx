@@ -1,13 +1,15 @@
 "use client";
 import { formatHash } from "@/lib/utils";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, WalletWithMetadata } from "@privy-io/react-auth";
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 
 export const Navbar = () => {
   const { user, logout } = usePrivy();
-  const walletAddress = user?.wallet?.address;
+  const walletAddress = (user?.linkedAccounts as WalletWithMetadata[])?.find(
+    (a) => a.connectorType !== "embedded"
+  )?.address;
 
   return (
     <div className="flex justify-between">

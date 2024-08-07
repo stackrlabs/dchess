@@ -4,6 +4,7 @@ import { useAction } from "@/api/useAction";
 import { useAddress } from "@/hooks/useAddress";
 import { ZeroAddress } from "@/lib/constants";
 import { formatHash } from "@/lib/utils";
+import { usePrivy } from "@privy-io/react-auth";
 import { Chess, Move } from "chess.js";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -20,6 +21,7 @@ export default function Game(props: GameProps) {
   const { params } = props;
   const { slug } = params;
   const { walletAddress, renderString } = useAddress();
+  const { ready } = usePrivy();
   const router = useRouter();
   const { data, isLoading, error } = useSWR(
     `games/${slug}`,
@@ -46,10 +48,6 @@ export default function Game(props: GameProps) {
   }
 
   function onDrop(sourceSquare: string, targetSquare: string, piece: string) {
-    if (walletAddress !== data?.w && walletAddress !== data?.b) {
-      return false;
-    }
-
     const move = makeAMove({
       from: sourceSquare,
       to: targetSquare,
@@ -65,7 +63,7 @@ export default function Game(props: GameProps) {
     return true;
   }
 
-  if (isLoading) {
+  if (isLoading || !ready) {
     return <div>Loading...</div>;
   }
 
@@ -85,6 +83,8 @@ export default function Game(props: GameProps) {
   const currentPlayer = b === walletAddress ? "b" : "w";
   const otherPlayer = currentPlayer === "w" ? "b" : "w";
 
+  const turn = game?.split(" ")?.[1] as "w" | "b";
+
   const getGameStatus = (status: GameStatus) => {
     if (status === "in_play") {
       return "";
@@ -99,8 +99,6 @@ export default function Game(props: GameProps) {
       return `${renderString(b)} (b) won`;
     }
   };
-
-  const turn = game?.split(" ")?.[1] as "w" | "b";
 
   return (
     <div className="flex justify-center mt-6 self-center flex-col gap-4">
@@ -128,11 +126,11 @@ export default function Game(props: GameProps) {
         onPieceDrop={onDrop}
         boardOrientation={currentPlayer === "w" ? "white" : "black"}
         arePiecesDraggable={
-          (startedAt > 0 &&
-            (w === walletAddress || walletAddress === b) &&
-            w !== ZeroAddress &&
-            b !== ZeroAddress &&
-            walletAddress === data[turn]) ||
+          startedAt > 0 &&
+          (w === walletAddress || walletAddress === b) &&
+          w !== ZeroAddress &&
+          b !== ZeroAddress &&
+          walletAddress === data[turn] &&
           !new Chess(game).isGameOver()
         }
       />

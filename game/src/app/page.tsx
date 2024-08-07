@@ -10,7 +10,7 @@ export default function Home() {
   const disableLogin = !ready || (ready && authenticated);
 
   return (
-    <main className="flex min-h-screen flex-col gap-8 py-6">
+    <main className="flex min-h-screen flex-col gap-8 py-6 w-[90rem] m-auto">
       <div className="flex gap-6 items-center">
         {authenticated ? (
           <CreateGame />

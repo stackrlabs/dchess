@@ -91,10 +91,10 @@ export const GameTable = () => {
                   {formatHash(game.gameId)}
                 </TableCell>
                 <TableCell className="font-mono">
-                  {renderString(game.w)}
+                  {renderString(game.w, game.wEns)}
                 </TableCell>
                 <TableCell className="font-mono">
-                  {renderString(game.b)}
+                  {renderString(game.b, game.bEns)}
                 </TableCell>
                 <TableCell>{getGameStatus(game)}</TableCell>
                 <TableCell className="text-right">

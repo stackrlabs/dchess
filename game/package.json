@@ -28,6 +28,7 @@
     "swr": "^2.2.5",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
+    "use-sound": "^4.0.3",
     "viem": "^2.19.1",
     "wagmi": "^2.12.4"
   },

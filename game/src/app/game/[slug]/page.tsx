@@ -3,11 +3,11 @@ import { GameStatus, getGame } from "@/api/api";
 import { useAction } from "@/api/useAction";
 import { useAddress } from "@/hooks/useAddress";
 import { ZeroAddress } from "@/lib/constants";
-import { formatAddress, formatHash } from "@/lib/utils";
+import { formatHash } from "@/lib/utils";
 import { usePrivy } from "@privy-io/react-auth";
 import { Chess, Move } from "chess.js";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import useSWR from "swr";
 import useSound from "use-sound";
@@ -24,16 +24,16 @@ export default function Game(props: GameProps) {
   const { walletAddress, renderString } = useAddress();
   const { ready } = usePrivy();
   const router = useRouter();
-  const { data, isLoading, error } = useSWR(
-    `games/${slug}`,
-    () => getGame(slug),
-    {
-      refreshInterval: 2000,
-    }
-  );
+  const {
+    data: remoteGame,
+    isLoading,
+    error,
+  } = useSWR(`games/${slug}`, () => getGame(slug), {
+    refreshInterval: 2000,
+  });
 
   const { submit } = useAction();
-  const [game, setGame] = useState(new Chess().fen());
+  const [game, setGame] = useState(new Chess());
 
   const [selfMove] = useSound("../../../sounds/move-self.mp3");
   const [capture] = useSound("../../../sounds/capture.mp3");
@@ -41,44 +41,65 @@ export default function Game(props: GameProps) {
   const [notify] = useSound("../../../sounds/notify.mp3");
   const [promote] = useSound("../../../sounds/promote.mp3");
 
-  useEffect(() => {
-    if (data) {
-      setGame(data.board);
-    }
-  }, [data]);
-
-  const playSound = (board: Chess) => {
-    if (board.isGameOver()) {
-      return notify();
-    }
-
-    if (board.isCheck()) {
-      return check();
-    }
-
-    // if piece is captured
-    if (board.history().length > 0) {
-      const lastMove = board.history({ verbose: true })[
-        board.history().length - 1
-      ];
-      if (lastMove.captured) {
-        return capture();
+  const playSound = useCallback(
+    (board: Chess) => {
+      if (board.isGameOver()) {
+        return notify();
       }
-      if (lastMove.promotion) {
-        return promote();
-      }
-    }
 
-    selfMove();
+      if (board.isCheck()) {
+        return check();
+      }
+
+      // if piece is captured
+      if (board.history().length > 0) {
+        const lastMove = board.history({ verbose: true })[
+          board.history().length - 1
+        ];
+        if (lastMove.captured) {
+          return capture();
+        }
+        if (lastMove.promotion) {
+          return promote();
+        }
+      }
+
+      selfMove();
+    },
+    [capture, check, notify, promote, selfMove]
+  );
+
+  const numberOfMoves = (board: Chess) => {
+    const fullMoves = Number(board.fen().split(" ")[5]) - 1;
+    return fullMoves * 2 + Number(board.turn() === "b");
   };
 
-  function makeAMove(move: Move | string) {
-    const board = new Chess(game);
-    const result = board.move(move);
-    setGame(board.fen());
-    playSound(board);
-    return result;
-  }
+  const updateBoard = useCallback(
+    (board: Chess) => {
+      setGame(board);
+      playSound(board);
+    },
+    [playSound]
+  );
+
+  useEffect(() => {
+    if (!remoteGame) {
+      return;
+    }
+
+    const remoteBoard = new Chess(remoteGame.board);
+    if (numberOfMoves(remoteBoard) > numberOfMoves(game)) {
+      console.log("remote move");
+      updateBoard(remoteBoard);
+    }
+  }, [remoteGame, game, updateBoard]);
+
+  const makeAMove = (move: Move | string) => {
+    const board = new Chess(game.fen());
+    const res = board.move(move);
+    updateBoard(board);
+    return res;
+  };
 
   function onDrop(sourceSquare: string, targetSquare: string, piece: string) {
     const move = makeAMove({
@@ -93,7 +114,6 @@ export default function Game(props: GameProps) {
     }
 
     submit("move", { gameId: slug, move: move.san });
-
     return true;
   }
 
@@ -106,18 +126,18 @@ export default function Game(props: GameProps) {
     return null;
   }
 
-  if (!data) {
+  if (!remoteGame) {
     return <div>Game not found</div>;
   }
 
-  const { w, b, startedAt, endedAt, status } = data;
+  const { w, b, startedAt, endedAt, status } = remoteGame;
 
   const isGuest = walletAddress !== w && walletAddress !== b;
 
   const currentPlayer = b === walletAddress ? "b" : "w";
   const otherPlayer = currentPlayer === "w" ? "b" : "w";
 
-  const turn = game?.split(" ")?.[1] as "w" | "b";
+  const turn = game?.fen().split(" ")?.[1] as "w" | "b";
 
   const getGameStatus = (status: GameStatus) => {
     if (status === "in_play") {
@@ -135,7 +155,7 @@ export default function Game(props: GameProps) {
   };
 
   return (
-    <div className="flex justify-center mt-6 self-center flex-col gap-4">
+    <div className="w-full flex flex-1 justify-center mt-6 self-center flex-col gap-4">
       <div className="flex flex-col justify-between">
         <div className="flex gap-20 text-lg">
           <p>
@@ -152,11 +172,11 @@ export default function Game(props: GameProps) {
       </div>
       <div>
         <b>Not You</b>{" "}
-        <p className="font-mono">{formatAddress(data[otherPlayer])}</p>
+        <p className="font-mono">{renderString(remoteGame[otherPlayer])}</p>
       </div>
       <Chessboard
         boardWidth={600}
-        position={game}
+        position={game.fen()}
         onPieceDrop={onDrop}
         boardOrientation={currentPlayer === "w" ? "white" : "black"}
         arePiecesDraggable={
@@ -164,13 +184,13 @@ export default function Game(props: GameProps) {
           (w === walletAddress || walletAddress === b) &&
           w !== ZeroAddress &&
           b !== ZeroAddress &&
-          walletAddress === data[turn] &&
-          !new Chess(game).isGameOver()
+          walletAddress === remoteGame[turn] &&
+          !game.isGameOver()
         }
       />
       <div>
         <b>{isGuest ? "Not You again!" : "You"}</b>{" "}
-        <p className="font-mono">{formatAddress(data[currentPlayer])}</p>
+        <p className="font-mono">{renderString(remoteGame[currentPlayer])}</p>
       </div>
     </div>
   );

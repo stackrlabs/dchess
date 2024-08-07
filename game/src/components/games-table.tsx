@@ -12,7 +12,9 @@ import useSWR from "swr";
 
 export const GameTable = () => {
   const { submit } = useAction();
-  const { data } = useSWR("games", () => getGames());
+  const { data } = useSWR("games", () => getGames(), {
+    refreshInterval: 5000,
+  });
   const { ready, user } = usePrivy();
   const { renderString, walletAddress } = useAddress();
   const router = useRouter();

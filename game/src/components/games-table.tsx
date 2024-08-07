@@ -20,14 +20,14 @@ export const GameTable = () => {
   const router = useRouter();
 
   const getGameStatus = (game: Game) => {
-    const { status, w, b } = game;
+    const { status } = game;
     if (status === "in_play") {
       return "LIVE";
     } else return "ENDED";
   };
 
   const getWinner = (game: Game) => {
-    const { status, w, b } = game;
+    const { status } = game;
     if (status === "w") {
       return "P1 WON";
     }
@@ -70,7 +70,10 @@ export const GameTable = () => {
   };
 
   const renderGame = (game: GameWithId) => (
-    <div key={game.id} className="border border-gray-500 p-6 group relative">
+    <div
+      key={game.gameId}
+      className="border border-gray-500 rounded-md p-6 group relative"
+    >
       <div className="flex gap-4 duration-200 relative">
         <div className="absolute h-full w-full flex justify-center items-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-50">
           <div className="flex gap-2">{renderActionForGame(game)}</div>
@@ -124,10 +127,8 @@ export const GameTable = () => {
       ) || []
     : [];
   const otherGames = data?.filter((game) => !myGames.includes(game)) || [];
-  const liveGames =
-    otherGames.filter((game) => game.status === "in_play");
-  const pastGames =
-    otherGames.filter((game) => game.status !== "in_play");
+  const liveGames = otherGames.filter((game) => game.status === "in_play");
+  const pastGames = otherGames.filter((game) => game.status !== "in_play");
 
   return (
     <div>

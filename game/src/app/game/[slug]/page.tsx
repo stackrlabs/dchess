@@ -202,7 +202,7 @@ export default function Game(props: GameProps) {
       </div>
       <div className="flex flex-1 flex-col w-full gap-4">
         <h1 className="text-2xl">Actions</h1>
-        <GameActions slug={slug} />
+        <GameActions slug={slug} white={w} black={b} />
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ export const Footer = () => {
   const { resolvedTheme } = useTheme();
   const image = resolvedTheme === "dark" ? "light" : "dark";
   return (
-    <footer className="flex items-center justify-center">
+    <footer className="flex items-center justify-center pt-6 pb-4">
       Powered By
       <Image
         src={`https://assets.stackrlabs.xyz/${image}.svg`}

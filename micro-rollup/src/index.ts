@@ -27,7 +27,7 @@ async function main() {
       post: ["pruneGames"],
     },
     stfSchemaMap,
-    isSandbox: false,
+    isSandbox: true,
   });
 
   await mru.init();

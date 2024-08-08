@@ -1,5 +1,6 @@
 import Providers from "@/components/auth-provider";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -37,6 +38,7 @@ export default function RootLayout({
             <div className="flex flex-col p-8 h-[100vh] w-[100vw]">
               <Navbar />
               {children}
+              <Footer />
             </div>
           </Providers>
         </ThemeProvider>

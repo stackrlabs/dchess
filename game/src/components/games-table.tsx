@@ -89,11 +89,15 @@ export const GameTable = () => {
           <div className="flex gap-2">{renderActionForGame(game)}</div>
         </div>
         <div className="duration-200 z-10 group-hover:blur-sm">
-          <Chessboard boardWidth={200} position={game.board} />
+          <Chessboard
+            boardWidth={screen.width > 768 ? 200 : 120}
+            position={game.board}
+            arePiecesDraggable={false}
+          />
         </div>
         <div className="flex-1 transition-all group-hover:blur-sm">
           <div className="font-mono flex flex-col justify-between h-full">
-            <div className="">
+            <div>
               <div className="flex gap-2">
                 <div
                   className={`${
@@ -110,8 +114,7 @@ export const GameTable = () => {
               </div>
               <div className="text-lg">{formatHash(game.gameId)}</div>
             </div>
-
-            <div className="">
+            <div>
               <div className="font-mono flex flex-col gap-2 text-[1rem]">
                 <div className="flex gap-2">
                   <div className="bg-white px-1 text-black rounded">P1</div>

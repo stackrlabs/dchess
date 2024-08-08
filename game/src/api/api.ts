@@ -1,3 +1,5 @@
+import { BlockStatus, DA } from "@/lib/constants";
+
 export interface Schema {
   primaryType: string;
   types: {
@@ -41,6 +43,28 @@ export interface Game {
   status: GameStatus;
 }
 
+export type DAMetadata = Record<
+  DA,
+  {
+    blockHeight: number;
+    extIdx?: number;
+    txHash?: string;
+    commitment?: string;
+  }
+>;
+
+export interface MRUAction {
+  name: string;
+  hash: string;
+  payload: any;
+  msgSender: string;
+  blockInfo: {
+    status: BlockStatus;
+    daMetadata: DAMetadata;
+    l1TxHash: string | null;
+  } | null;
+}
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const get = async <T>(path: string): Promise<T> => {
@@ -57,6 +81,10 @@ const getInfo = async () => {
 
 const getGame = async (slug: string) => {
   return get<Game>(`games/${slug}`);
+};
+
+const getGameActions = async (slug: string) => {
+  return get<MRUAction[]>(`games/${slug}/actions`);
 };
 
 const getGames = async () => {
@@ -77,5 +105,5 @@ const submitAction = async (path: string, data: any) => {
   return res.json();
 };
 
-export { getGame, getGames, getInfo, submitAction };
+export { getGame, getGameActions, getGames, getInfo, submitAction };
 

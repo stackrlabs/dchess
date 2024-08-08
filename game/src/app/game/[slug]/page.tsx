@@ -1,6 +1,7 @@
 "use client";
 import { GameStatus, getGame } from "@/api/api";
 import { useAction } from "@/api/useAction";
+import { GameActions } from "@/components/game-actions/game-actions";
 import { useAddress } from "@/hooks/useAddress";
 import { ZeroAddress } from "@/lib/constants";
 import { boardInfo, formatAddress } from "@/lib/utils";
@@ -18,7 +19,6 @@ interface GameProps {
   };
 }
 
-const MIN_WIDTH = 32;
 export default function Game(props: GameProps) {
   const { params } = props;
   const { slug } = params;
@@ -36,7 +36,6 @@ export default function Game(props: GameProps) {
   const { submit } = useAction();
   const [game, setGame] = useState(new Chess());
   const [isFirstLoad, setIsFirstLoad] = useState(true);
-  const [width, setWidth] = useState(MIN_WIDTH * 2);
 
   const [selfMove] = useSound("../../../sounds/move-self.mp3");
   const [capture] = useSound("../../../sounds/capture.mp3");
@@ -100,12 +99,6 @@ export default function Game(props: GameProps) {
     }
   }, [remoteGame, game, updateBoard]);
 
-  const measuredRef = useCallback((node: HTMLDivElement) => {
-    if (node !== null) {
-      setWidth(Math.min(node.clientWidth, node.clientHeight));
-    }
-  }, []);
-
   const makeAMove = (move: Move | string) => {
     const board = new Chess(game.fen());
     const res = board.move(move);
@@ -167,42 +160,49 @@ export default function Game(props: GameProps) {
   };
 
   return (
-    <div className="flex flex-1 w-full justify-center mt-6 self-center flex-col gap-4">
-      <div className="flex flex-col justify-between">
-        <div className="flex gap-20 text-lg">
-          <p>
-            <b>Turn:</b> {turn === "w" ? "White" : "Black"}
-          </p>
-          <p>
-            <b>Status:</b> {endedAt > 0 ? getGameStatus(status) : "In Play"}
+    <div className="flex mt-8">
+      <div className="flex flex-1 flex-col w-full gap-4">
+        <div>
+          <div className="flex gap-20 text-lg">
+            <p>
+              <b>Turn:</b> {turn === "w" ? "White" : "Black"}
+            </p>
+            <p>
+              <b>Status:</b> {endedAt > 0 ? getGameStatus(status) : "In Play"}
+            </p>
+          </div>
+        </div>
+        <div>
+          <b>Not You</b>{" "}
+          <p className="font-mono">{formatAddress(remoteGame[otherPlayer])}</p>
+        </div>
+        <div>
+          <Chessboard
+            id={slug}
+            boardWidth={450}
+            position={game.fen()}
+            onPieceDrop={onDrop}
+            boardOrientation={currentPlayer === "w" ? "white" : "black"}
+            arePiecesDraggable={
+              startedAt > 0 &&
+              (w === walletAddress || walletAddress === b) &&
+              w !== ZeroAddress &&
+              b !== ZeroAddress &&
+              walletAddress === remoteGame[turn] &&
+              !game.isGameOver()
+            }
+          />
+        </div>
+        <div>
+          <b>{isGuest ? "Not You again!" : "You"}</b>{" "}
+          <p className="font-mono">
+            {formatAddress(remoteGame[currentPlayer])}
           </p>
         </div>
       </div>
-
-      <div>
-        <b>Not You</b>{" "}
-        <p className="font-mono">{formatAddress(remoteGame[otherPlayer])}</p>
-      </div>
-      <div ref={measuredRef} className="flex-1 w-full content-center">
-        <Chessboard
-          id={slug}
-          boardWidth={width}
-          position={game.fen()}
-          onPieceDrop={onDrop}
-          boardOrientation={currentPlayer === "w" ? "white" : "black"}
-          arePiecesDraggable={
-            startedAt > 0 &&
-            (w === walletAddress || walletAddress === b) &&
-            w !== ZeroAddress &&
-            b !== ZeroAddress &&
-            walletAddress === remoteGame[turn] &&
-            !game.isGameOver()
-          }
-        />
-      </div>
-      <div>
-        <b>{isGuest ? "Not You again!" : "You"}</b>{" "}
-        <p className="font-mono">{formatAddress(remoteGame[currentPlayer])}</p>
+      <div className="flex flex-1 flex-col w-full gap-4">
+        <h1 className="text-2xl">Actions</h1>
+        <GameActions slug={slug} />
       </div>
     </div>
   );

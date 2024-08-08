@@ -48,17 +48,29 @@ async function main() {
   /** Routes */
   app.get("/info", (_req: Request, res: Response) => {
     const transitionToSchema = mru.getStfSchemaMap();
+    const { name, version, chainId, verifyingContract, salt } =
+      mru.config.domain;
     res.send({
       signingInstructions: "signTypedData(domain, schema.types, inputs)",
-      domain: mru.config.domain,
+      // IMPORTANT: don't change the order of the properties in the domain object
+      domain: {
+        name,
+        version,
+        chainId,
+        verifyingContract,
+        salt,
+      },
       transitionToSchema,
-      schemas: Object.values(schemas).reduce((acc, schema) => {
-        acc[schema.identifier] = {
-          primaryType: schema.EIP712TypedData.primaryType,
-          types: schema.EIP712TypedData.types,
-        };
-        return acc;
-      }, {} as Record<string, any>),
+      schemas: Object.values(schemas).reduce(
+        (acc, schema) => {
+          acc[schema.identifier] = {
+            primaryType: schema.EIP712TypedData.primaryType,
+            types: schema.EIP712TypedData.types,
+          };
+          return acc;
+        },
+        {} as Record<string, any>
+      ),
     });
   });
 

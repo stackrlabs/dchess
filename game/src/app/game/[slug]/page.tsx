@@ -3,11 +3,11 @@ import { GameStatus, getGame } from "@/api/api";
 import { useAction } from "@/api/useAction";
 import { useAddress } from "@/hooks/useAddress";
 import { ZeroAddress } from "@/lib/constants";
-import { formatAddress, formatHash } from "@/lib/utils";
+import { boardInfo, formatAddress } from "@/lib/utils";
 import { usePrivy } from "@privy-io/react-auth";
 import { Chess, Move } from "chess.js";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import useSWR from "swr";
 import useSound from "use-sound";
@@ -35,7 +35,8 @@ export default function Game(props: GameProps) {
 
   const { submit } = useAction();
   const [game, setGame] = useState(new Chess());
-  const ref = useRef<HTMLDivElement>(null);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [width, setWidth] = useState(MIN_WIDTH * 2);
 
   const [selfMove] = useSound("../../../sounds/move-self.mp3");
   const [capture] = useSound("../../../sounds/capture.mp3");
@@ -44,7 +45,7 @@ export default function Game(props: GameProps) {
   const [promote] = useSound("../../../sounds/promote.mp3");
 
   const playSound = useCallback(
-    (board: Chess) => {
+    (board: Chess, oldBoard: Chess) => {
       if (board.isGameOver()) {
         return notify();
       }
@@ -53,17 +54,17 @@ export default function Game(props: GameProps) {
         return check();
       }
 
-      // if piece is captured
-      if (board.history().length > 0) {
-        const lastMove = board.history({ verbose: true })[
-          board.history().length - 1
-        ];
-        if (lastMove.captured) {
-          return capture();
-        }
-        if (lastMove.promotion) {
-          return promote();
-        }
+      const { sortedPieces: oldPieces, pawnsCount: oldPawns } =
+        boardInfo(oldBoard);
+      const { sortedPieces: newPieces, pawnsCount: newPawns } =
+        boardInfo(board);
+
+      if (oldPieces.length !== newPieces.length) {
+        return capture();
+      }
+
+      if (oldPawns !== newPawns) {
+        return promote();
       }
 
       selfMove();
@@ -77,11 +78,15 @@ export default function Game(props: GameProps) {
   };
 
   const updateBoard = useCallback(
-    (board: Chess) => {
+    (board: Chess, oldBoard: Chess) => {
       setGame(board);
-      playSound(board);
+      if (isFirstLoad) {
+        setIsFirstLoad(false);
+      } else {
+        playSound(board, oldBoard);
+      }
     },
-    [playSound]
+    [playSound, isFirstLoad]
   );
 
   useEffect(() => {
@@ -91,14 +96,20 @@ export default function Game(props: GameProps) {
 
     const remoteBoard = new Chess(remoteGame.board);
     if (numberOfMoves(remoteBoard) > numberOfMoves(game)) {
-      updateBoard(remoteBoard);
+      updateBoard(remoteBoard, game);
     }
   }, [remoteGame, game, updateBoard]);
+
+  const measuredRef = useCallback((node: HTMLDivElement) => {
+    if (node !== null) {
+      setWidth(Math.min(node.clientWidth, node.clientHeight));
+    }
+  }, []);
 
   const makeAMove = (move: Move | string) => {
     const board = new Chess(game.fen());
     const res = board.move(move);
-    updateBoard(board);
+    updateBoard(board, game);
     return res;
   };
 
@@ -155,11 +166,6 @@ export default function Game(props: GameProps) {
     }
   };
 
-  const width = Math.min(
-    ref.current?.clientWidth || MIN_WIDTH * 2,
-    ref.current?.clientHeight || MIN_WIDTH * 2
-  );
-
   return (
     <div className="flex flex-1 w-full justify-center mt-6 self-center flex-col gap-4">
       <div className="flex flex-col justify-between">
@@ -177,10 +183,10 @@ export default function Game(props: GameProps) {
         <b>Not You</b>{" "}
         <p className="font-mono">{formatAddress(remoteGame[otherPlayer])}</p>
       </div>
-      <div ref={ref} className="flex-1 w-full content-center">
+      <div ref={measuredRef} className="flex-1 w-full content-center">
         <Chessboard
           id={slug}
-          boardWidth={width - MIN_WIDTH}
+          boardWidth={width}
           position={game.fen()}
           onPieceDrop={onDrop}
           boardOrientation={currentPlayer === "w" ? "white" : "black"}

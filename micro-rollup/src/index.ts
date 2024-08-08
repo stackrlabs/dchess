@@ -1,5 +1,6 @@
 import {
   ActionConfirmationStatus,
+  ActionExecutionStatus,
   ActionSchema,
   MicroRollup,
 } from "@stackr/sdk";
@@ -26,7 +27,7 @@ async function main() {
       post: ["pruneGames"],
     },
     stfSchemaMap,
-    isSandbox: true,
+    isSandbox: false,
   });
 
   await mru.init();
@@ -103,6 +104,53 @@ async function main() {
 
     const { board, ...rest } = game;
     return res.send({ ...rest, board: board.fen() });
+  });
+
+  app.get("/games/:gameId/actions", async (req: Request, res: Response) => {
+    const { gameId } = req.params;
+    const { wrappedState } = machine;
+    const game = wrappedState.games[gameId];
+    if (!game) {
+      res.status(404).send({ message: "GAME_NOT_FOUND" });
+      return;
+    }
+
+    const actionsAndBlocks = await mru.actions.query(
+      {
+        executionStatus: ActionExecutionStatus.ACCEPTED,
+        block: {
+          isReverted: false,
+        },
+      },
+      false
+    );
+
+    const gameActions = actionsAndBlocks.filter((actionAndBlock) => {
+      if (actionAndBlock.name === "createGame") {
+        return actionAndBlock.logs?.[0]?.value === gameId;
+      }
+      return actionAndBlock.payload.gameId === gameId;
+    });
+
+    const actions = gameActions.map((actionAndBlock) => {
+      const { name, payload, hash, msgSender, block } = actionAndBlock;
+
+      return {
+        name,
+        payload,
+        hash,
+        msgSender,
+        blockInfo: block
+          ? {
+              status: block.status,
+              daMetadata: block.batchInfo?.daMetadata || null,
+              l1TxHash: block.batchInfo?.l1TransactionHash || null,
+            }
+          : null,
+      };
+    });
+
+    return res.send(actions);
   });
 
   app.get("/games", async (_req: Request, res: Response) => {

@@ -160,26 +160,12 @@ export default function Game(props: GameProps) {
   };
 
   return (
-    <div className="flex mt-8">
-      <div className="flex flex-1 flex-col w-full gap-4">
-        <div>
-          <div className="flex gap-20 text-lg">
-            <p>
-              <b>Turn:</b> {turn === "w" ? "White" : "Black"}
-            </p>
-            <p>
-              <b>Status:</b> {endedAt > 0 ? getGameStatus(status) : "In Play"}
-            </p>
-          </div>
-        </div>
-        <div>
-          <b>Not You</b>{" "}
-          <p className="font-mono">{formatAddress(remoteGame[otherPlayer])}</p>
-        </div>
-        <div>
+    <div className="flex md:mt-8 m-auto w-full px-4 lg:p-0 lg:w-[1500px] flex-col md:flex-row gap-8 md:gap-0">
+      <div className="flex flex-col gap-4">
+        <div className="overflow-hidden rounded-lg">
           <Chessboard
             id={slug}
-            boardWidth={450}
+            boardWidth={screen.width > 768 ? 450 : screen.width - 32}
             position={game.fen()}
             onPieceDrop={onDrop}
             boardOrientation={currentPlayer === "w" ? "white" : "black"}
@@ -193,15 +179,36 @@ export default function Game(props: GameProps) {
             }
           />
         </div>
-        <div>
-          <b>{isGuest ? "Not You again!" : "You"}</b>{" "}
-          <p className="font-mono">
-            {formatAddress(remoteGame[currentPlayer])}
-          </p>
+
+        <div className="grid grid-cols-2 gap-4 w-full max-w-md">
+          <div className="p-2 bg-gray-800 rounded">
+            <p className="uppercase font-mono tracking-widest">Status</p>
+            <p className="font-extrabold uppercase text-green-500">
+              {endedAt > 0 ? getGameStatus(status) : "Live"}
+            </p>
+          </div>
+          <div className="p-2 bg-gray-800 rounded text-right">
+            <p className="uppercase font-mono tracking-widest">Turn</p>
+            <p className="font-extrabold uppercase text-teal-500">
+              {turn === "w" ? "White" : "Black"}
+            </p>
+          </div>
+          <div className="p-2 bg-gray-800 rounded">
+            <p className="uppercase font-mono tracking-widest">Player W</p>
+            <p className="font-mono text-sm break-all">
+              {formatAddress(remoteGame.w)}
+            </p>
+          </div>
+          <div className="p-2 bg-gray-800 rounded text-right">
+            <p className="uppercase font-mono tracking-widest">Player B</p>
+            <p className="font-mono text-sm break-all">
+              {!isGuest ? "YOU" : formatAddress(remoteGame.b)}
+            </p>
+          </div>
         </div>
       </div>
-      <div className="flex flex-1 flex-col w-full gap-4">
-        <h1 className="text-2xl">Actions</h1>
+      <div className="flex flex-col w-full gap-4 px-0 md:px-20">
+        <h1 className="text-2xl">Game</h1>
         <GameActions slug={slug} white={w} black={b} />
       </div>
     </div>

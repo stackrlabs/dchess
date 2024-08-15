@@ -1,5 +1,6 @@
 "use client";
 import { useAction } from "@/api/useAction";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -25,8 +26,16 @@ export const CreateGame = () => {
   };
 
   return (
-    <Button disabled={loading} onClick={handleCreateGame}>
-      {loading ? "Creating game..." : "Create game"}
+    <Button
+      className="font-mono uppercase"
+      disabled={loading}
+      onClick={handleCreateGame}
+      variant={"secondary"}
+    >
+      <div className="flex items-center gap-3">
+        {loading ? "Creating game..." : "Create New game"}
+        <Plus size={15} />
+      </div>
     </Button>
   );
 };

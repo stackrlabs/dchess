@@ -68,11 +68,17 @@ export const GameActions = ({ slug, white, black }: GameActionsProps) => {
       <TableBody>
         {mruActions.map(({ name, hash, payload, msgSender, blockInfo }) => (
           <TableRow key={hash} className="font-mono">
-            <TableCell>{name}</TableCell>
+            <TableCell className="uppercase w-8">
+              {name === "joinGame"
+                ? "JOIN"
+                : name === "createGame"
+                  ? "CREATE"
+                  : name}
+            </TableCell>
             <TableCell>
               {formatAddress(msgSender)} ({msgSender === white ? "w" : "b"})
             </TableCell>
-            <TableCell>
+            <TableCell className="uppercase">
               <i>{getActionSubtext({ name, payload })}</i>
             </TableCell>
             <TableCell align="right">

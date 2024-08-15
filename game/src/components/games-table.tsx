@@ -82,7 +82,7 @@ export const GameTable = () => {
   const renderGame = (game: GameWithId) => (
     <div
       key={game.gameId}
-      className="border border-gray-500 rounded-md p-6 group relative"
+      className="border border-gray-500 rounded-md p-4 md:p-6 group relative"
     >
       <div className="flex gap-4 duration-200 relative">
         <div className="absolute h-full w-full flex justify-center items-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-50">
@@ -102,25 +102,27 @@ export const GameTable = () => {
                 <div
                   className={`${
                     game.status === "in_play" ? "bg-green-500" : "bg-red-400"
-                  } px-2 w-fit text-black rounded`}
+                  } px-1 md:px-2 w-fit text-black rounded text-xs md:text-sm`}
                 >
                   {getGameStatus(game)}
                 </div>
                 {getWinner(game) && (
-                  <div className="bg-white px-2 w-fit text-black rounded">
+                  <div className="bg-white px-1 md:px-2 w-fit text-black text-xs md:text-sm rounded">
                     {getWinner(game)}
                   </div>
                 )}
               </div>
-              <div className="text-lg">{formatHash(game.gameId)}</div>
+              <div className="text-sm md:text-lg">
+                {formatHash(game.gameId)}
+              </div>
             </div>
             <div>
               <div className="font-mono flex flex-col gap-2 text-[1rem]">
-                <div className="flex gap-2">
+                <div className="flex gap-2 text-xs md:text-sm">
                   <div className="bg-white px-1 text-black rounded">P1</div>
                   {renderString(game.w)}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 text-xs md:text-sm">
                   <div className="bg-gray-800 px-1 text-white border border-white rounded">
                     P2
                   </div>
@@ -144,13 +146,13 @@ export const GameTable = () => {
   const pastGames = otherGames.filter((game) => game.status !== "in_play");
 
   return (
-    <div>
+    <div className="">
       {data && ready && (
         <>
           {walletAddress && (
             <div className="mt-4">
               <h1 className="text-2xl font-mono">My Games</h1>
-              <div className="grid grid-cols-3 gap-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
                 {myGames.length ? (
                   myGames.map(renderGame)
                 ) : (
@@ -161,7 +163,7 @@ export const GameTable = () => {
           )}
           <div className="mt-4">
             <h1 className="text-2xl font-mono">Live Games</h1>
-            <div className="grid grid-cols-3 gap-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
               {liveGames.length ? (
                 liveGames.map(renderGame)
               ) : (
@@ -171,7 +173,7 @@ export const GameTable = () => {
           </div>
           <div className="mt-4">
             <h1 className="text-2xl font-mono">Past Games</h1>
-            <div className="grid grid-cols-3 gap-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
               {pastGames.length ? (
                 pastGames.map(renderGame)
               ) : (

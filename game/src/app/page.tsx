@@ -10,12 +10,17 @@ export default function Home() {
   const disableLogin = !ready || (ready && authenticated);
 
   return (
-    <main className="flex flex-1 flex-col gap-8 py-6 w-full m-auto">
-      <div className="flex gap-6 items-center">
+    <main className="flex flex-col gap-8 m-auto w-full px-4 lg:p-0 lg:w-[1500px]">
+      <div className="flex gap-6 items-center mt-0 md:mt-8">
         {authenticated ? (
           <CreateGame />
         ) : (
-          <Button disabled={disableLogin} onClick={login}>
+          <Button
+            className="font-mono uppercase"
+            disabled={disableLogin}
+            onClick={login}
+            variant={"secondary"}
+          >
             Connect Wallet to Play
           </Button>
         )}

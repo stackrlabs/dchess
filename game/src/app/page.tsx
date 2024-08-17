@@ -15,14 +15,21 @@ export default function Home() {
         {authenticated ? (
           <CreateGame />
         ) : (
-          <Button
-            className="font-mono uppercase"
-            disabled={disableLogin}
-            onClick={login}
-            variant={"secondary"}
-          >
-            Connect Wallet to Play
-          </Button>
+          <div>
+            <Button
+              className="font-mono uppercase"
+              disabled={disableLogin}
+              onClick={login}
+              variant={"secondary"}
+            >
+              Connect Wallet to Play
+            </Button>
+            <p className="text-xs text-slate-300 font-mono mt-2">
+              Your wallet is not used for any transactions, it will be your
+              identity to access your embedded wallet, which will be used to
+              sign transactions.
+            </p>
+          </div>
         )}
       </div>
       <GameTable />

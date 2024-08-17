@@ -140,7 +140,6 @@ export default function Game(props: GameProps) {
   const isGuest = walletAddress !== w && walletAddress !== b;
 
   const currentPlayer = b === walletAddress ? "b" : "w";
-  const otherPlayer = currentPlayer === "w" ? "b" : "w";
 
   const turn = game?.fen().split(" ")?.[1] as "w" | "b";
 
@@ -171,7 +170,7 @@ export default function Game(props: GameProps) {
             boardOrientation={currentPlayer === "w" ? "white" : "black"}
             arePiecesDraggable={
               startedAt > 0 &&
-              (w === walletAddress || walletAddress === b) &&
+              !isGuest &&
               w !== ZeroAddress &&
               b !== ZeroAddress &&
               walletAddress === remoteGame[turn] &&
@@ -195,14 +194,18 @@ export default function Game(props: GameProps) {
           </div>
           <div className="p-2 bg-gray-800 rounded">
             <p className="uppercase font-mono tracking-widest">Player W</p>
-            <p className="font-mono text-sm break-all">
-              {formatAddress(remoteGame.w)}
+            <p className="font-mono font-extrabold text-sm break-all">
+              {remoteGame.w === walletAddress
+                ? "You"
+                : formatAddress(remoteGame.w)}
             </p>
           </div>
           <div className="p-2 bg-gray-800 rounded text-right">
             <p className="uppercase font-mono tracking-widest">Player B</p>
-            <p className="font-mono text-sm break-all">
-              {!isGuest ? "YOU" : formatAddress(remoteGame.b)}
+            <p className="font-mono font-extrabold text-sm break-all">
+              {remoteGame.b === walletAddress
+                ? "You"
+                : formatAddress(remoteGame.b)}
             </p>
           </div>
         </div>

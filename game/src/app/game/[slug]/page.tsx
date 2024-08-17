@@ -123,7 +123,7 @@ export default function Game(props: GameProps) {
   }
 
   if (isLoading || !ready) {
-    return <div>Loading...</div>;
+    return <div className="p-6">Loading...</div>;
   }
 
   if (!isLoading && error) {
@@ -160,7 +160,7 @@ export default function Game(props: GameProps) {
   };
 
   return (
-    <div className="flex md:mt-8 m-auto w-full px-4 lg:p-0 lg:w-[1500px] flex-col md:flex-row gap-8 md:gap-0">
+    <div className="flex md:mt-8 m-auto w-full px-4 lg:py-0 lg:w-[1500px] flex-col md:flex-row gap-8 md:gap-0">
       <div className="flex flex-col gap-4">
         <div className="overflow-hidden rounded-lg">
           <Chessboard

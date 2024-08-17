@@ -22,7 +22,7 @@ export const Navbar = () => {
         className="text-4xl font-bold select-none cursor-pointer"
       >
         <Image
-          src={"./logo-white.svg"}
+          src={"https://chess.stf.xyz/logo-white.svg"}
           width={150}
           height={150}
           alt="dchess-logo"

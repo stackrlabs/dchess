@@ -146,7 +146,7 @@ export const GameTable = () => {
   const pastGames = otherGames.filter((game) => game.status !== "in_play");
 
   return (
-    <div className="">
+    <div>
       {data && ready && (
         <>
           {walletAddress && (
@@ -171,16 +171,14 @@ export const GameTable = () => {
               )}
             </div>
           </div>
-          <div className="mt-4">
-            <h1 className="text-2xl font-mono">Past Games</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-              {pastGames.length ? (
-                pastGames.map(renderGame)
-              ) : (
-                <div className="text-slate-500 font-mono">No games</div>
-              )}
+          {pastGames.length > 0 && (
+            <div className="mt-4">
+              <h1 className="text-2xl font-mono">Past Games</h1>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                {pastGames.map(renderGame)}
+              </div>
             </div>
-          </div>
+          )}
         </>
       )}
     </div>

@@ -2,6 +2,7 @@ import { Chess } from "chess.js";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { isAddress } from "viem";
+import { ZeroAddress } from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -12,6 +13,10 @@ export function formatHash(hash: string) {
 }
 
 export function formatAddress(address: string) {
+  if (address === ZeroAddress) {
+    return "Not Joined";
+  }
+
   if (isAddress(address)) {
     return formatHash(address);
   }

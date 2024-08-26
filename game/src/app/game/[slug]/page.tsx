@@ -8,7 +8,7 @@ import { boardInfo, formatAddress } from "@/lib/utils";
 import { usePrivy } from "@privy-io/react-auth";
 import { Chess, Move } from "chess.js";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { Chessboard } from "react-chessboard";
 import useSWR from "swr";
 import useSound from "use-sound";
@@ -32,10 +32,10 @@ export default function Game(props: GameProps) {
   } = useSWR(`games/${slug}`, () => getGame(slug), {
     refreshInterval: 2000,
   });
-
   const { submit } = useAction();
+
   const [game, setGame] = useState(new Chess());
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const lastPlayedMoveRef = useRef<number>(-1);
 
   const [selfMove] = useSound("../../../sounds/move-self.mp3");
   const [capture] = useSound("../../../sounds/capture.mp3");
@@ -78,14 +78,15 @@ export default function Game(props: GameProps) {
 
   const updateBoard = useCallback(
     (board: Chess, oldBoard: Chess) => {
+      const currentMoveNumber = numberOfMoves(board);
       setGame(board);
-      if (isFirstLoad) {
-        setIsFirstLoad(false);
-      } else {
+
+      if (currentMoveNumber > lastPlayedMoveRef.current) {
         playSound(board, oldBoard);
+        lastPlayedMoveRef.current = currentMoveNumber;
       }
     },
-    [playSound, isFirstLoad]
+    [playSound]
   );
 
   useEffect(() => {

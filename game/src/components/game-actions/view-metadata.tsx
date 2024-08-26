@@ -20,6 +20,8 @@ const getExplorerUrl = (
       return `${DA_POINTER_URL[daName]}/${values.blockHeight}-${values.extIdx}`;
     case DA.CELESTIA:
       return `${DA_POINTER_URL[daName]}/${values.txHash}`;
+    case DA.EIGEN:
+      return `${DA_POINTER_URL[daName]}/${values.requestID}`;
     default:
       return "";
   }

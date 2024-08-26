@@ -62,7 +62,7 @@ const joinGame: STF<ChessState, JoinGameInput> = {
 };
 
 const move: STF<ChessState, MoveInput> = {
-  handler: ({ state, inputs, msgSender, emit }) => {
+  handler: ({ state, inputs, msgSender, block, emit }) => {
     const { gameId, move } = inputs;
     const game = state.games[gameId];
     if (!game) {
@@ -80,7 +80,7 @@ const move: STF<ChessState, MoveInput> = {
     }
 
     if (gameBoard.isGameOver()) {
-      game.endedAt = Date.now();
+      game.endedAt = block.timestamp;
       if (gameBoard.isCheckmate()) {
         game.status = gameBoard.turn() === "w" ? "b" : "w";
       } else {

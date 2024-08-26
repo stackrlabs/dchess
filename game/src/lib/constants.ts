@@ -18,14 +18,17 @@ export enum BlockStatus {
 export enum DA {
   AVAIL = "avail",
   CELESTIA = "celestia",
+  EIGEN = "eigen",
 }
 
 export const DA_NAME = {
   [DA.AVAIL]: "Avail",
   [DA.CELESTIA]: "Celestia",
+  [DA.EIGEN]: "Eigen",
 };
 
 export const DA_POINTER_URL = {
   [DA.AVAIL]: "https://avail-turing.subscan.io/extrinsic",
   [DA.CELESTIA]: "https://mocha-4.celenium.io/tx",
+  [DA.EIGEN]: "https://blobs-holesky.eigenda.xyz/blobs",
 };

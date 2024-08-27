@@ -36,6 +36,7 @@ export default function Game(props: GameProps) {
 
   const [game, setGame] = useState(new Chess());
   const lastPlayedMoveRef = useRef<number>(-1);
+  const isFirstLoadRef = useRef(true);
 
   const [selfMove] = useSound("../../../sounds/move-self.mp3");
   const [capture] = useSound("../../../sounds/capture.mp3");
@@ -81,10 +82,13 @@ export default function Game(props: GameProps) {
       const currentMoveNumber = numberOfMoves(board);
       setGame(board);
 
-      if (currentMoveNumber > lastPlayedMoveRef.current) {
+      if (
+        currentMoveNumber > lastPlayedMoveRef.current &&
+        !isFirstLoadRef.current
+      ) {
         playSound(board, oldBoard);
-        lastPlayedMoveRef.current = currentMoveNumber;
       }
+      lastPlayedMoveRef.current = currentMoveNumber;
     },
     [playSound]
   );
@@ -97,6 +101,10 @@ export default function Game(props: GameProps) {
     const remoteBoard = new Chess(remoteGame.board);
     if (numberOfMoves(remoteBoard) > numberOfMoves(game)) {
       updateBoard(remoteBoard, game);
+    }
+
+    if (isFirstLoadRef.current) {
+      isFirstLoadRef.current = false;
     }
   }, [remoteGame, game, updateBoard]);
 
@@ -119,6 +127,7 @@ export default function Game(props: GameProps) {
       return false;
     }
 
+    isFirstLoadRef.current = false;
     submit("move", { gameId: slug, move: move.san });
     return true;
   }

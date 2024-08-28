@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAddress } from "@/hooks/useAddress";
 import { formatHash } from "@/lib/utils";
 import { usePrivy } from "@privy-io/react-auth";
+import { InfoIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Chessboard } from "react-chessboard";
@@ -152,6 +153,13 @@ export const GameTable = () => {
           {walletAddress && (
             <div className="mt-4">
               <h1 className="text-2xl font-mono">My Games</h1>
+
+              <div className="py-2 text-blue-200 text-sm font-mono flex gap-2 text-center align-middle items-center">
+                <InfoIcon className="inline" size={16} />
+                If no one joins a created game within a certain period, it is
+                automatically pruned from the rollup state.
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
                 {myGames.length ? (
                   myGames.map(renderGame)

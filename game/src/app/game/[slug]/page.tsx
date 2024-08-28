@@ -181,7 +181,7 @@ export default function Game(props: GameProps) {
       return "You";
     }
     if (player === ZeroAddress) {
-      if (authenticated) {
+      if (authenticated && isGuest) {
         return (
           <Button
             className="h-[22px]"

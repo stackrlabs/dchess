@@ -2,13 +2,14 @@
 import { GameStatus, getGame } from "@/api/api";
 import { useAction } from "@/api/useAction";
 import { GameActions } from "@/components/game-actions/game-actions";
+import { Button } from "@/components/ui/button";
 import { useAddress } from "@/hooks/useAddress";
 import { ZeroAddress } from "@/lib/constants";
-import { boardInfo, formatAddress } from "@/lib/utils";
+import { boardInfo } from "@/lib/utils";
 import { usePrivy } from "@privy-io/react-auth";
 import { Chess, Move } from "chess.js";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import useSWR from "swr";
 import useSound from "use-sound";
@@ -23,7 +24,8 @@ export default function Game(props: GameProps) {
   const { params } = props;
   const { slug } = params;
   const { walletAddress, renderString } = useAddress();
-  const { ready } = usePrivy();
+  const { ready, authenticated } = usePrivy();
+  const [joining, setJoining] = useState(false);
   const router = useRouter();
   const {
     data: remoteGame,
@@ -168,6 +170,33 @@ export default function Game(props: GameProps) {
     }
   };
 
+  const handleJoinGame = async (gameId: string) => {
+    setJoining(true);
+    await submit("joinGame", { gameId });
+    setJoining(false);
+  };
+
+  const renderPlayerInfo = (player: string) => {
+    if (player === walletAddress) {
+      return "You";
+    }
+    if (player === ZeroAddress) {
+      if (authenticated) {
+        return (
+          <Button
+            className="h-[22px]"
+            size={"sm"}
+            onClick={() => handleJoinGame(slug)}
+          >
+            {joining ? "Joining..." : "Join"}
+          </Button>
+        );
+      }
+      return "Not Joined";
+    }
+    return renderString(player);
+  };
+
   return (
     <div className="flex md:mt-8 m-auto w-full px-4 lg:py-0 lg:w-[1500px] flex-col md:flex-row gap-8 md:gap-0">
       <div className="flex flex-col gap-4">
@@ -205,17 +234,13 @@ export default function Game(props: GameProps) {
           <div className="p-2 bg-gray-800 rounded">
             <p className="uppercase font-mono tracking-widest">Player W</p>
             <p className="font-mono font-extrabold text-sm break-all">
-              {remoteGame.w === walletAddress
-                ? "You"
-                : formatAddress(remoteGame.w)}
+              {renderPlayerInfo(remoteGame.w)}
             </p>
           </div>
           <div className="p-2 bg-gray-800 rounded text-right">
             <p className="uppercase font-mono tracking-widest">Player B</p>
             <p className="font-mono font-extrabold text-sm break-all">
-              {remoteGame.b === walletAddress
-                ? "You"
-                : formatAddress(remoteGame.b)}
+              {renderPlayerInfo(remoteGame.b)}
             </p>
           </div>
         </div>

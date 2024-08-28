@@ -154,8 +154,8 @@ export const GameTable = () => {
             <div className="mt-4">
               <h1 className="text-2xl font-mono">My Games</h1>
 
-              <div className="py-2 text-blue-200 text-sm font-mono flex gap-2 text-center align-middle items-center">
-                <InfoIcon className="inline" size={16} />
+              <div className="py-2 text-blue-200 text-sm font-mono flex gap-2 align-middle items-center">
+                <InfoIcon className="inline min-w-4 w-4" />
                 If no one joins a created game within a certain period, it is
                 automatically pruned from the rollup state.
               </div>

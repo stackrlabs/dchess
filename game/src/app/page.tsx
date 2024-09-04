@@ -4,10 +4,30 @@ import { CreateGame } from "@/components/create-game";
 import { GameTable } from "@/components/games-table";
 import { Button } from "@/components/ui/button";
 import { usePrivy } from "@privy-io/react-auth";
+import { useEffect } from "react";
+import WebApp from "@twa-dev/sdk";
+
+const initTelegram = () => {
+  if (isTelegramWebView()) {
+    console.log("Running inside Telegram WebView");
+    WebApp.ready();
+  } else {
+    console.log("Not running inside Telegram WebView");
+  }
+};
+
+function isTelegramWebView() {
+  const userAgent = navigator.userAgent || navigator.vendor;
+  return /Telegram/i.test(userAgent);
+}
 
 export default function Home() {
   const { ready, authenticated, login } = usePrivy();
   const disableLogin = !ready || (ready && authenticated);
+
+  useEffect(() => {
+    initTelegram();
+  }, []);
 
   return (
     <main className="flex flex-col gap-8 m-auto w-full px-4 lg:py-0 lg:w-[1500px]">

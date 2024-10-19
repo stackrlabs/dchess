@@ -10,7 +10,7 @@
     "@stackr/sdk": "0.5.2",
     "chess.js": "^1.0.0-beta.8",
     "ethers": "^6.7.1",
-    "express": "^4.19.2",
+    "express": "^4.21.1",
     "inquirer": "^9.2.17",
     "sqlite3": "^5.1.7"
   },

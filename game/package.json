@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@privy-io/react-auth": "^1.76.2",
+    "@privy-io/react-auth": "^2.4.2",
     "@privy-io/wagmi": "^0.2.12",
     "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-dropdown-menu": "^2.1.1",
@@ -30,7 +30,7 @@
     "tailwindcss-animate": "^1.0.7",
     "use-sound": "^4.0.3",
     "viem": "^2.19.1",
-    "wagmi": "^2.12.4"
+    "wagmi": "^2.14.11"
   },
   "devDependencies": {
     "@types/node": "^20",
